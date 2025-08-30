@@ -1,16 +1,23 @@
-﻿using BepInEx.Logging;
+﻿using BepInEx.Bootstrap;
+using BepInEx.Logging;
 using EFT;
+using EFT.EnvironmentEffect;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
+using Newtonsoft.Json.Linq;
 using SPT.Reflection.Patching;
 using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Color = UnityEngine.Color;
 
 
 namespace UIRefresh.Patches
@@ -243,26 +250,109 @@ namespace UIRefresh.Patches
 
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(InventoryScreen), "Show", new System.Type[] { typeof(IHealthController), typeof(InventoryController), typeof(AbstractQuestControllerClass), typeof(AbstractAchievementControllerClass), typeof(GClass3695), typeof(CompoundItem),typeof(EInventoryTab), typeof(ISession), typeof(ItemContextAbstractClass), typeof(Boolean) });
+            return AccessTools.Method(typeof(InventoryScreen), "Show", new System.Type[] { typeof(IHealthController), typeof(InventoryController), typeof(AbstractQuestControllerClass), typeof(AbstractAchievementControllerClass), typeof(GClass3695), typeof(CompoundItem), typeof(EInventoryTab), typeof(ISession), typeof(ItemContextAbstractClass), typeof(Boolean) });
         }
 
         [PatchPostfix]
         public static void Postfix(InventoryScreen __instance, ISession ___iSession)
         {
+            //Check if widget was created before
             var existingClock = __instance.transform.Find("Clock Widget");
             if (existingClock != null)
             {
+                //If exisiting
                 var clockText = existingClock.GetComponent<TMPro.TextMeshProUGUI>();
-                clockText.text = ___iSession.GetCurrentLocationTime.ToString("HH:mm:ss");
+                clockText.text = GetRaidTime(___iSession);
                 return;
             }
-
+            //Create for first time
             var clockWidget = new GameObject("Clock Widget");
             clockWidget.transform.SetParent(__instance.transform, false);
             var newClockText = clockWidget.AddComponent<TMPro.TextMeshProUGUI>();
-            newClockText.text = ___iSession.GetCurrentLocationTime.ToString("HH:mm:ss");
+            newClockText.text = GetRaidTime(___iSession);
             newClockText.fontSize = 29;
-            clockWidget.GetComponent<RectTransform>().anchoredPosition = new Vector2(670, 510);
+            clockWidget.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 440);
+        }
+
+        private static string GetRaidTime(ISession ___iSession)
+        {
+            // If IDNC is installed, get raid time from helper.
+            if (Chainloader.PluginInfos.ContainsKey("Jehree.ImmersiveDaylightCycle"))
+            {
+                Logger.LogWarning("[Immersive Day Night Active]");
+                return TryGetImmersiveTime();
+            }
+
+            // Otherwise fallback to default time
+            return ___iSession.GetCurrentLocationTime.ToString("HH:mm:ss");
+        }
+
+        private static string TryGetImmersiveTime()
+        {
+            try
+            {
+                var type = AccessTools.TypeByName("Jehree.ImmersiveDaylightCycle.Helpers.Utils");
+                if (type != null)
+                {
+                    var method = AccessTools.Method(type, "GetCurrentTime");
+
+                    var result = method.Invoke(null, null);
+                    if (result is DateTime dt)
+                    {
+                        return dt.ToString("HH:mm:ss");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError($"Failed to get IDNC time: {ex}");
+            }
+            return "??:??";
+        }
+    }
+
+
+    internal class MapOnTaskBarPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(MenuTaskBar).GetMethod(nameof(MenuTaskBar.Awake));
+        }
+
+        [PatchPostfix]
+        public static void Postfix(Dictionary<EMenuType, AnimatedToggle> ____toggleButtons, Dictionary<EMenuType,
+                   HoverTooltipArea> ____hoverTooltipAreas, ref GameObject[] ____newInformation)
+        {
+                GameObject fleaMarketGameObject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/FleaMarket");
+                if (fleaMarketGameObject != null)
+                {
+                    GameObject MapButtonGameObject = GameObject.Instantiate(fleaMarketGameObject);
+                    MapButtonGameObject.name = "Map";
+                    MapButtonGameObject.transform.SetParent(fleaMarketGameObject.transform.parent, false);
+                    MapButtonGameObject.transform.SetSiblingIndex(4);
+
+                    GameObject MapButton = MapButtonGameObject.transform.GetChild(0).gameObject;
+                    MapButton.name = "Map";
+
+                    LocalizedText text = MapButtonGameObject.GetComponentInChildren<LocalizedText>();
+                    if (text != null)
+                    {
+                    text.LocalizationKey = "";
+                    text.method_2("Map");
+                    }
+
+                GameObject mapListObject = GameObject.Find("Common UI/Common UI/InventoryScreen/Tab Bar/Tabs/Map/Normal/Icon/");
+                if (mapListObject != null)
+                {
+                    Image FoundmapImage = mapListObject.GetComponent<Image>();
+                    Image MapButtonSprite = MapButtonGameObject.transform.GetChild(0).transform.GetChild(0).gameObject.GetComponent<Image>();
+
+                    if (MapButtonSprite != null && FoundmapImage != null)
+                    {
+                        MapButtonSprite.sprite = FoundmapImage.sprite;
+                    }
+                }
+            }
         }
     }
 }

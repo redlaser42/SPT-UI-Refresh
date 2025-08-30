@@ -22,8 +22,8 @@ namespace UIRefresh
             new AcceptLocationPatch().Enable();
             new TimeHasComePatch().Enable();
             new FinalCountdownPatch().Enable();
-
             new ClockPatch().Enable();
+            new MapOnTaskBarPatch().Enable();
 
         }
     }
