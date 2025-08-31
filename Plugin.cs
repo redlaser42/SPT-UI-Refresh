@@ -23,8 +23,8 @@ namespace UIRefresh
             new TimeHasComePatch().Enable();
             new FinalCountdownPatch().Enable();
             new ClockPatch().Enable();
-            new MapOnTaskBarPatch().Enable();
-
+            //new MapOnTaskBarPatch().Enable();
+            new QuickSlotsHUDPatch().Enable();
         }
     }
     }

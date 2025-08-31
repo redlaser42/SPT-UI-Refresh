@@ -1,18 +1,14 @@
 ﻿using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using EFT;
-using EFT.EnvironmentEffect;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
-using Newtonsoft.Json.Linq;
 using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
@@ -113,7 +109,6 @@ namespace UIRefresh.Patches
         {
             __instance.transform.Find("WarningPanel").gameObject.SetActive(false);
             __instance.transform.Find("Tab Bar").GetComponent<RectTransform>().anchoredPosition = new Vector2(1, -100);
-
             __instance.transform.Find("ItemsToInsurePanel").GetComponent<RectTransform>().sizeDelta = new Vector2(5, -305);
             __instance.transform.Find("ItemsToInsurePanel").GetComponent<RectTransform>().anchoredPosition = new Vector2(-3.5f, 20);
             __instance.transform.Find("ItemsToInsurePanel").Find("ItemsToInsureList").GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, -80);
@@ -138,13 +133,16 @@ namespace UIRefresh.Patches
 
             // Adjust player model
             var previewPanel = __instance.transform.Find("PreviewsPanel");
+            if (previewPanel != null)
+            {
                 previewPanel.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(20f, 155f);
                 previewPanel.transform.Find("CurrentPlayerModelView").Find("PlayerMVObject").Find("Camera_acceptScreen").GetComponent<Camera>().fieldOfView = 12;
                 previewPanel.transform.Find("CurrentPlayerModelView").Find("PlayerMVObject").Find("Camera_acceptScreen").GetComponent<Transform>().localEulerAngles = new Vector3(358f, 352.3f, 0f);
-                previewPanel.transform.Find("CurrentPlayerModelView").Find("PlayerMVObject").Find("Camera_acceptScreen").GetComponent<Transform>().localPosition = new Vector3(0.81f, - 0.08f, - 1.8f);
+                previewPanel.transform.Find("CurrentPlayerModelView").Find("PlayerMVObject").Find("Camera_acceptScreen").GetComponent<Transform>().localPosition = new Vector3(0.81f, -0.08f, -1.8f);
                 previewPanel.transform.Find("CurrentPlayerModelView").Find("PlayerMVObject").Find("Camera_acceptScreen").GetComponent<PrismEffects>().enabled = false;
                 previewPanel.transform.Find("CurrentPlayerModelView").GetComponent<RectTransform>().sizeDelta = new Vector2(600, 1000);
                 previewPanel.transform.Find("CurrentPlayerModelView").GetComponent<RectTransform>().anchoredPosition = new Vector2(-18, -300);
+            }
         }
     }
 
@@ -166,66 +164,79 @@ namespace UIRefresh.Patches
             __instance.transform.Find("Loader").gameObject.SetActive(false);
 
             //Other Players in Raid list - move
-            __instance.transform.Find("PartyInfoPanel").GetComponent<RectTransform>().localPosition = new Vector2(-922, 550);
-
+            var partyInfoPanel = __instance.transform.Find("PartyInfoPanel");
+            if (partyInfoPanel != null)
+            {
+                partyInfoPanel.GetComponent<RectTransform>().localPosition = new Vector2(-922, 550);
+            }
             //Map Name - move, increase font, set background to match.
             var locationName = __instance.transform.Find("Location Name Panel");
-                locationName.gameObject.GetComponent<RectTransform>().localPosition = new Vector2(-880,950);
+            if (locationName != null)
+            {
+                locationName.gameObject.GetComponent<RectTransform>().localPosition = new Vector2(-880, 950);
                 locationName.gameObject.transform.Find("Name").GetComponent<CustomTextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
                 locationName.gameObject.transform.Find("Name").GetComponent<CustomTextMeshProUGUI>().fontSize = 130;
                 locationName.gameObject.transform.Find("Background").GetComponent<RectTransform>().sizeDelta = new Vector2(450, 150);
                 locationName.gameObject.transform.Find("Background").GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
-
+            }
             //Loading Status Text - move and align left
             var deployCaption = __instance.transform.Find("Deploying Caption");
+            if (deployCaption != null)
+            {
                 deployCaption.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(-746, 17);
                 deployCaption.gameObject.GetComponent<CustomTextMeshProUGUI>().alignment = TextAlignmentOptions.Left;
-
+            }
             //Start and Back Button - move
-                __instance.transform.Find("Back Button Panel").gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(-840, 55);
-
+            var startBackButton = __instance.transform.Find("Back Button Panel");
+            if (startBackButton != null)
+            {
+                startBackButton.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(-840, 55);
+            }
             //Player Model - move and resize.
             var playerModel = __instance.transform.Find("PlayerModelView");
-                playerModel.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(800f, 0f);
+            if (playerModel != null)
+            {
+                playerModel.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(700f, 0f);
                 playerModel.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(1000, 0f);
                 playerModel.gameObject.GetComponent<AspectRatioFitter>().aspectRatio = 2.7f;
 
-
-            //Player Model Lights. Deactiavate all but Main and adjust.
-            playerModel.Find("PlayerModelViewObject").Find("Camera_timehascome0").GetComponent<Camera>().fieldOfView = 26;
-                var lights = playerModel.Find("PlayerModelViewObject").Find("Lights");
-                for (int i = 0; i < lights.childCount; i++)
+                var playerModelCamera = playerModel.Find("PlayerModelViewObject").Find("Camera_timehascome0");
+                if (playerModelCamera != null)
                 {
-                    Transform child = lights.GetChild(i);
-                    child.gameObject.SetActive(child.name == "Main Light");
+                    playerModelCamera.GetComponent<Camera>().fieldOfView = 26;
                 }
 
-                var mainLight = lights.Find("Main Light");
-                    mainLight.GetComponent<Transform>().localEulerAngles = new Vector3 (60f, 60f, 20f);
+                //Player Model Lights. Deactiavate all but Main and adjust.
+
+                var playerModellights = playerModel.Find("PlayerModelViewObject").Find("Lights");
+                if (playerModellights != null)
+                {
+                    for (int i = 0; i < playerModellights.childCount; i++)
+                    {
+                        Transform child = playerModellights.GetChild(i);
+                        child.gameObject.SetActive(child.name == "Main Light");
+                    }
+
+                    var mainLight = playerModellights.Find("Main Light");
+                    mainLight.GetComponent<Transform>().localEulerAngles = new Vector3(60f, 60f, 20f);
                     mainLight.GetComponent<Transform>().localPosition = new Vector3(-0.243f, -294.1938f, 4.65f);
                     mainLight.GetComponent<Light>().type = LightType.Spot;
                     mainLight.GetComponent<Light>().spotAngle = 65;
                     mainLight.GetComponent<Light>().range = 1.3f;
                     mainLight.GetComponent<Light>().intensity = 6f;
                     mainLight.GetComponent<Light>().color = new Color(1, 0.86f, 0.74f, 1);
+                }
+            }
 
-            //Remove Bottom Task Bar except for Settings button.
+
+            //Remove Bottom Task Bar
             PreloaderUI preloaderUI = MonoBehaviourSingleton<PreloaderUI>.Instance;
-
             if (preloaderUI == null)
             {
                 Logger.LogError("preloaderUI Null");
                 return;
             }
-            Logger.LogWarning("Attempted to hide Taskbar");
-            preloaderUI.transform.Find("Preloader UI").Find("BottomPanel").Find("Background").gameObject.SetActive(false);
-            var taskbarTabs = preloaderUI.transform.Find("Preloader UI").Find("BottomPanel").Find("Content").Find("TaskBar").Find("Tabs");
-
-            for (int i = 0; i < taskbarTabs.childCount; i++)
-            {
-                Transform child = taskbarTabs.GetChild(i);
-                child.gameObject.SetActive(child.name == "Settings");
-            }
+            preloaderUI.SetMenuTaskBarVisibility(false);
         }
     }
 
@@ -352,6 +363,35 @@ namespace UIRefresh.Patches
                         MapButtonSprite.sprite = FoundmapImage.sprite;
                     }
                 }
+            }
+        }
+    }
+
+
+    // Hide Quickslot HUD
+    internal class QuickSlotsHUDPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(InventoryScreenQuickAccessPanel), "Show", new System.Type[] { typeof(InventoryController), typeof(ItemUiContext), typeof(GamePlayerOwner), typeof(InsuranceCompanyClass) });
+        }
+
+        [PatchPostfix]
+        static void Postfix(InventoryScreenQuickAccessPanel __instance)
+        {
+            GameObject QuickSlotObject = GameObject.Find("Common UI/Common UI/EFTBattleUIScreen Variant/QuickAccessPanel/");
+            if (QuickSlotObject != null)
+            {
+                QuickSlotObject.transform.GetChild(0).gameObject.SetActive(false);
+                QuickSlotObject.transform.GetChild(1).gameObject.SetActive(false);
+            }
+
+            GameObject BattleStanceObject = GameObject.Find("Common UI/Common UI/EFTBattleUIScreen Variant/BattleStancePanel/");
+            if (QuickSlotObject != null)
+            {
+                BattleStanceObject.transform.GetChild(1).gameObject.SetActive(false);
+                BattleStanceObject.transform.GetChild(3).gameObject.SetActive(false);
+                BattleStanceObject.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
             }
         }
     }
