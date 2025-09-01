@@ -1,18 +1,26 @@
 ﻿using BepInEx.Bootstrap;
 using BepInEx.Logging;
+using Comfort.Common;
 using EFT;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.Matchmaker;
+using EFT.UI.UI.Matchmaker;
 using HarmonyLib;
+using HarmonyLib.Tools;
 using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Device;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static EFT.UI.Matchmaker.MatchMakerSelectionLocationScreen;
+using static System.Collections.Specialized.BitVector32;
 using Color = UnityEngine.Color;
 
 
@@ -67,14 +75,29 @@ namespace UIRefresh.Patches
         {
             //Deactivates top text and stripped background of condidions panel.
             __instance.transform.Find("CaptionsHolder").gameObject.SetActive(false);
-            __instance.transform.Find("Conditions Panel").Find("Tiles").gameObject.SetActive(false);
 
-            // Centers Map.
-            __instance.transform.Find("Content").GetComponent<RectTransform>().anchoredPosition = new Vector2(200, 0);
+
+            var conditionsPannel = __instance.transform.Find("Conditions Panel");
+                conditionsPannel.Find("Tiles").gameObject.SetActive(false);
+                conditionsPannel.GetComponent<RectTransform>().anchoredPosition = new Vector2(-440, 860);
+                conditionsPannel.GetComponent<Image>().enabled = false;
+
+
+            var map = __instance.transform.Find("Content").GetChild(1);
+            var locationInfo = __instance.transform.Find("Content").GetChild(0);
 
             //Increases location name and icon. 
-            __instance.transform.Find("Content").Find("Location Info Panel").GetComponent<RectTransform>().anchoredPosition = new Vector2(100, -160);
-            __instance.transform.Find("Content").Find("Location Info Panel").Find("Banner").GetComponent <RectTransform>().localScale = new Vector3(1.76f, 1.76f , 1);
+            locationInfo.GetComponent<RectTransform>().anchoredPosition = new Vector2(-800, -200);
+            locationInfo.Find("Banner").GetComponent <RectTransform>().localScale = new Vector3(1.76f, 1.76f , 1);
+            locationInfo.Find("DescriptionPanel").GetChild(0).GetComponent<CustomTextMeshProUGUI>().fontSize = 16;
+
+            locationInfo.Find("DescriptionPanel").GetChild(1).GetChild(2).gameObject.SetActive(false);
+
+
+
+            map.GetComponent<RectTransform>().anchoredPosition = new Vector2(950, 100);
+            map.GetComponent<RectTransform>().sizeDelta = new Vector2(796, 0);
+
         }
     }
 
@@ -147,7 +170,7 @@ namespace UIRefresh.Patches
     }
 
     //Raid Loading Screen
-    internal class TimeHasComePatch : ModulePatch
+    internal class TimeHasComeShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -162,6 +185,14 @@ namespace UIRefresh.Patches
             __instance.transform.Find("CaptionsHolder").gameObject.SetActive(false);
             __instance.transform.Find("Logo").gameObject.SetActive(false);
             __instance.transform.Find("Loader").gameObject.SetActive(false);
+
+            GameObject environmentUI = GameObject.Find("Environment UI/");
+            if (environmentUI != null)
+            {
+                var customPlane = environmentUI.transform.GetChild(2).GetChild(0).GetChild(3);
+                Logger.LogError("Enabling UI backgound");
+                customPlane.gameObject.SetActive(false);
+            }
 
             //Other Players in Raid list - move
             var partyInfoPanel = __instance.transform.Find("PartyInfoPanel");
@@ -198,7 +229,7 @@ namespace UIRefresh.Patches
             {
                 playerModel.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(700f, 0f);
                 playerModel.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(1000, 0f);
-                playerModel.gameObject.GetComponent<AspectRatioFitter>().aspectRatio = 2.7f;
+                playerModel.gameObject.GetComponent<AspectRatioFitter>().aspectRatio = 3.3f;
 
                 var playerModelCamera = playerModel.Find("PlayerModelViewObject").Find("Camera_timehascome0");
                 if (playerModelCamera != null)
@@ -211,11 +242,10 @@ namespace UIRefresh.Patches
                 var playerModellights = playerModel.Find("PlayerModelViewObject").Find("Lights");
                 if (playerModellights != null)
                 {
-                    for (int i = 0; i < playerModellights.childCount; i++)
-                    {
-                        Transform child = playerModellights.GetChild(i);
-                        child.gameObject.SetActive(child.name == "Main Light");
-                    }
+                    playerModellights.GetChild(2).gameObject.SetActive(false);
+                    playerModellights.GetChild(3).gameObject.SetActive(false);
+
+                    playerModellights.GetChild(1).GetComponent<Light>().color = new Color(0.92f, 0.92f, 1, 1);
 
                     var mainLight = playerModellights.Find("Main Light");
                     mainLight.GetComponent<Transform>().localEulerAngles = new Vector3(60f, 60f, 20f);
@@ -240,6 +270,20 @@ namespace UIRefresh.Patches
         }
     }
 
+    internal class TimeHasComeClosePatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(MatchmakerTimeHasCome).GetMethod(nameof(MatchmakerTimeHasCome.OnDestroy));
+        }
+
+        [PatchPostfix]
+        static void Postfix(MatchmakerTimeHasCome __instance)
+        {
+
+        }
+    }
+
     // "Deploying In.." Screen
     internal class FinalCountdownPatch : ModulePatch
     {
@@ -252,6 +296,17 @@ namespace UIRefresh.Patches
         static void Postfix(MatchmakerFinalCountdown __instance)
         {
             __instance.transform.Find("Logo").gameObject.SetActive(false);
+
+
+            GameObject environmentUI = GameObject.Find("Environment UI/");
+            if (environmentUI != null)
+            {
+                var backgroundScene = environmentUI.transform.GetChild(2);
+                backgroundScene.gameObject.SetActive(false);
+
+                var customPlane = backgroundScene.GetChild(0).GetChild(3);
+                customPlane.gameObject.SetActive(true);
+            }
         }
     }
 
@@ -267,8 +322,10 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         public static void Postfix(InventoryScreen __instance, ISession ___iSession)
         {
+            var clockParent = __instance.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1);
+
             //Check if widget was created before
-            var existingClock = __instance.transform.Find("Clock Widget");
+            var existingClock = clockParent.transform.Find("Clock Widget");
             if (existingClock != null)
             {
                 //If exisiting
@@ -278,11 +335,11 @@ namespace UIRefresh.Patches
             }
             //Create for first time
             var clockWidget = new GameObject("Clock Widget");
-            clockWidget.transform.SetParent(__instance.transform, false);
+            clockWidget.transform.SetParent(clockParent, false);
             var newClockText = clockWidget.AddComponent<TMPro.TextMeshProUGUI>();
             newClockText.text = GetRaidTime(___iSession);
-            newClockText.fontSize = 29;
-            clockWidget.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 440);
+            newClockText.fontSize = 38;
+            clockWidget.GetComponent<RectTransform>().anchoredPosition = new Vector2(170, -395);
         }
 
         private static string GetRaidTime(ISession ___iSession)
@@ -362,6 +419,31 @@ namespace UIRefresh.Patches
                     {
                         MapButtonSprite.sprite = FoundmapImage.sprite;
                     }
+
+
+                    //Bind MAP button action and SFX.
+                    AnimatedToggle animatedToggle = MapButtonGameObject.GetComponentInChildren<AnimatedToggle>();
+                    if (animatedToggle != null)
+                    {
+                        animatedToggle.onValueChanged.AddListener(async (arg) =>
+                        {
+                            try
+                            {
+                                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
+
+                                var sideSelectionMenuGO = GameObject.Find("Menu UI/UI/MatchMaker Side Selection Screen/");
+                                var sideSelectionInst = sideSelectionMenuGO.transform.GetComponent<MatchMakerSideSelectionScreen>();
+                                AccessTools.Field(typeof(MatchMakerSideSelectionScreen), "esideType_0").SetValue(sideSelectionInst, ESideType.Pmc);
+                                
+                                Logger.LogError("Attempting to call method");
+                                sideSelectionInst.method_18();
+                            }
+                            catch (Exception ex)
+                            {
+                            Logger.LogError(ex);
+                            }
+                        });
+                    }
                 }
             }
         }
@@ -395,4 +477,5 @@ namespace UIRefresh.Patches
             }
         }
     }
+
 }

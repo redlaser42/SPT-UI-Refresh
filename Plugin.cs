@@ -20,10 +20,10 @@ namespace UIRefresh
             new RaidSettingsScreenPatch().Enable();
             new InsuranceScreenPatch().Enable();
             new AcceptLocationPatch().Enable();
-            new TimeHasComePatch().Enable();
+            new TimeHasComeShowPatch().Enable();
             new FinalCountdownPatch().Enable();
             new ClockPatch().Enable();
-            //new MapOnTaskBarPatch().Enable();
+            new MapOnTaskBarPatch().Enable();
             new QuickSlotsHUDPatch().Enable();
         }
     }
