@@ -1,10 +1,16 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using EFT.Hideout;
+using EFT.UI.Matchmaker;
+using HarmonyLib.Tools;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using UIRefresh.Patches;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using static UIRefresh.Patches.MenuScreenShowPatch;
 
 namespace UIRefresh
 {
@@ -20,6 +26,15 @@ namespace UIRefresh
         public static ConfigEntry<bool>? EnableMapConfig;
         public static ConfigEntry<bool>? PTTLocationNameConfig;
         public static ConfigEntry<bool>? HideBackgoundpPatch;
+        public static ConfigEntry<bool>? DisableGroupConfig;
+        public static ConfigEntry<bool>? HideOutMainMenuConfig;
+        public static ConfigEntry<bool>? SkipPreRaidMenusConfig;
+
+
+
+        public bool isMainMenuSetup = false;
+
+
 
         public static ConfigEntry<Color> CustomsColorConfig { get; set; }
         public static ConfigEntry<Color> FactoryColorConfig { get; set; }
@@ -41,14 +56,13 @@ namespace UIRefresh
         private void Awake()
             {
             new SideSelectionPatch().Enable();
-            new LocationSelectionPatch().Enable();
-            new RaidSettingsScreenPatch().Enable();
+            new LocationSelectionShowPatch().Enable();
+            new RaidSettingsScreenShowPatch().Enable();
             new InsuranceScreenPatch().Enable();
             new AcceptLocationPatch().Enable();
             new TimeHasComeShowPatch().Enable();
             new FinalCountdownPatch().Enable();
-
-
+            new MenuScreenShowPatch().Enable();
 
 
             CustomsColorConfig = Config.Bind("Colors","Customs Color", new Color(0.56f, 0.51f, 0.15f), ".");
@@ -63,12 +77,29 @@ namespace UIRefresh
             LabsColorConfig = Config.Bind("Colors", "Labs Color", new Color(1, 1, 1), ".");
 
 
+            DisableGroupConfig = Config.Bind(
+            "Menu UI",                // Section name
+            "Disable Group Widget",       // Setting key
+            true,                     // Default value
+            "Disables the Group buttons on the Task Bar."
+            );
+            if (DisableGroupConfig.Value)
+            {
+                new HideGroupPatch().Enable();
+            }
 
-
-
+            SkipPreRaidMenusConfig = Config.Bind(
+            "Menu UI",                // Section name
+            "Skip Pre-Raid Menus",       // Setting key
+            true,                     // Default value
+            "Skips Raid Settings and Insurance Menus."
+            );
+            if (SkipPreRaidMenusConfig.Value)
+            {
+            }
 
             EnableClockPatchConfig = Config.Bind(
-                "General",                // Section name
+                "Menu UI",                // Section name
                 "Enable Clock Widget",       // Setting key
                 true,                     // Default value
                 "Enable or disable the raid clock widget."
@@ -101,7 +132,7 @@ namespace UIRefresh
             }
 
             EnableMapConfig = Config.Bind(
-                "General",                // Section name
+                "Menu UI",                // Section name
                 "Enable Map Button",       // Setting key
                 true,                     // Default value
                 "Enable or disable the Map button on the Taskbar."
@@ -112,8 +143,18 @@ namespace UIRefresh
             }
 
 
+            HideOutMainMenuConfig = Config.Bind(
+            "Beta",                // Section name
+            "Show Hideout in Main Menu",       // Setting key
+            false,                     // Default value
+            "Shows the Hideout in the main menu."
+            );
+            if (HideOutMainMenuConfig.Value)
+            {
+            }
+
             PTTLocationNameConfig = Config.Bind(
-                "Mods",                // Section name
+                "Beta",                // Section name
                 "Enable PTT Location Name",       // Setting key
                 false,                     // Default value
                 "Shows your Path To Tarkov out-of-raid location on the map."
@@ -152,6 +193,31 @@ namespace UIRefresh
                 default:
                     return Color.white; // fallback if map name not recognized
             }
+        }
+
+        public static GameObject FindRootObject(string sceneName, string objectName)
+        {
+            // Get the scene by name (you could also use SceneManager.GetSceneAt(index))
+            Scene scene = SceneManager.GetSceneByName(sceneName);
+
+            if (!scene.isLoaded)
+            {
+                Debug.LogError($"Scene {sceneName} is not loaded!");
+                return null;
+            }
+
+            // Get all root objects in the scene
+            GameObject[] rootObjects = scene.GetRootGameObjects();
+
+            foreach (var go in rootObjects)
+            {
+                if (go.name == objectName)
+                {
+                    return go;
+                }
+            }
+
+            return null; // Not found
         }
     }
     }

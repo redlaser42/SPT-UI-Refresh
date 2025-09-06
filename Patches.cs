@@ -2,6 +2,7 @@
 using Comfort.Common;
 using EFT;
 using EFT.HealthSystem;
+using EFT.Hideout;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.Matchmaker;
@@ -14,7 +15,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Color = UnityEngine.Color;
-using UIRefresh;
 
 
 namespace UIRefresh.Patches
@@ -25,7 +25,7 @@ namespace UIRefresh.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(MatchMakerSideSelectionScreen), "Show", new System.Type[] { typeof(ISession), typeof(RaidSettings), typeof(IHealthController), typeof(InventoryController)});
+            return AccessTools.Method(typeof(MatchMakerSideSelectionScreen), "Show", new System.Type[] { typeof(ISession), typeof(RaidSettings), typeof(IHealthController), typeof(InventoryController) });
         }
 
         [PatchPostfix]
@@ -38,8 +38,8 @@ namespace UIRefresh.Patches
 
             // Adjust PMC model
             var PMC = __instance.transform.Find("PMCs");
-                PMC.GetComponent<RectTransform>().anchoredPosition = new Vector2(150, -100);
-                PMC.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 300);
+            PMC.GetComponent<RectTransform>().anchoredPosition = new Vector2(150, -100);
+            PMC.GetComponent<RectTransform>().sizeDelta = new Vector2(0, 300);
 
             //PMC.transform.Find("PMCPlayerMV").GetComponent<RectTransform>().anchoredPosition = new Vector2(-200, 500);
             //PMC.transform.Find("PMCPlayerMV").Find("PlayerMVObject").Find("Camera_matchmaker").GetComponent<Camera>().fieldOfView = 20;
@@ -63,11 +63,11 @@ namespace UIRefresh.Patches
     }
 
     // Level Select Map Menu
-    internal class LocationSelectionPatch : ModulePatch
+    internal class LocationSelectionShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(MatchMakerSelectionLocationScreen), "Show", new System.Type[] { typeof(ISession), typeof(RaidSettings), typeof(MatchmakerPlayerControllerClass)});
+            return AccessTools.Method(typeof(MatchMakerSelectionLocationScreen), "Show", new System.Type[] { typeof(ISession), typeof(RaidSettings), typeof(MatchmakerPlayerControllerClass) });
         }
 
         [PatchPostfix]
@@ -77,16 +77,16 @@ namespace UIRefresh.Patches
             __instance.transform.Find("CaptionsHolder").gameObject.SetActive(false);
 
             var conditionsPannel = __instance.transform.Find("Conditions Panel");
-                conditionsPannel.Find("Tiles").gameObject.SetActive(false);
-                conditionsPannel.GetComponent<RectTransform>().anchoredPosition = new Vector2(-440, 860);
-                conditionsPannel.GetComponent<Image>().enabled = false;
+            conditionsPannel.Find("Tiles").gameObject.SetActive(false);
+            conditionsPannel.GetComponent<RectTransform>().anchoredPosition = new Vector2(-440, 860);
+            conditionsPannel.GetComponent<Image>().enabled = false;
 
             var map = __instance.transform.Find("Content").GetChild(1);
             var locationInfo = __instance.transform.Find("Content").GetChild(0);
 
             //Increases location name and icon. 
             locationInfo.GetComponent<RectTransform>().anchoredPosition = new Vector2(-800, -200);
-            locationInfo.Find("Banner").GetComponent <RectTransform>().localScale = new Vector3(1.76f, 1.76f , 1);
+            locationInfo.Find("Banner").GetComponent<RectTransform>().localScale = new Vector3(1.76f, 1.76f, 1);
             locationInfo.Find("DescriptionPanel").GetChild(0).GetComponent<CustomTextMeshProUGUI>().fontSize = 16;
             locationInfo.Find("DescriptionPanel").GetChild(1).GetChild(2).gameObject.SetActive(false);
 
@@ -96,8 +96,23 @@ namespace UIRefresh.Patches
         }
     }
 
+    // Skips to Join/Host
+    [HarmonyPatch(typeof(MatchMakerSelectionLocationScreen), "method_14")]
+    class Method14Patch
+    {
+        // Prefix will run instead of the original if you return false
+        static bool Prefix(MatchMakerSelectionLocationScreen __instance)
+        {
+            Plugin.LogSource.LogInfo("method_14 was intercepted!");
+
+
+
+            return false; // skip the original method_14
+        }
+    }
+
     //Offline Raid Settings Menu
-    internal class RaidSettingsScreenPatch : ModulePatch
+    internal class RaidSettingsScreenShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -111,6 +126,12 @@ namespace UIRefresh.Patches
             __instance.transform.Find("Content").Find("Description").gameObject.SetActive(false);
             __instance.transform.Find("Content").Find("Space (1)").gameObject.SetActive(false);
             __instance.transform.Find("Content").Find("Space (2)").gameObject.SetActive(false);
+
+            if (Plugin.SkipPreRaidMenusConfig.Value)
+            {
+                var nextButton = __instance.transform.Find("ScreenDefaultButtons/NextButton/");
+                nextButton.GetComponent<DefaultUIButton>().method_11();
+            }
         }
     }
 
@@ -131,6 +152,24 @@ namespace UIRefresh.Patches
             __instance.transform.Find("ItemsToInsurePanel").GetComponent<RectTransform>().anchoredPosition = new Vector2(-3.5f, 20);
             __instance.transform.Find("ItemsToInsurePanel").Find("ItemsToInsureList").GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, -80);
             __instance.transform.Find("ItemsToInsurePanel").Find("ItemsToInsureList").GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 490);
+
+            if (Plugin.HideOutMainMenuConfig.Value)
+            {
+                GameObject fpsCAM = Plugin.FindRootObject("CommonUIScene", "FPS Camera");
+                if (fpsCAM == null)
+                {
+                    fpsCAM = Plugin.FindRootObject("MenuUIScene", "FPS Camera");
+                }
+                fpsCAM.SetActive(true);
+            }
+
+            if (Plugin.SkipPreRaidMenusConfig.Value)
+            {
+
+                var nextButton = __instance.transform.Find("ScreenDefaultButtons/NextButton/");
+                nextButton.GetComponent<DefaultUIButton>().method_11();
+
+            }
         }
     }
 
@@ -139,15 +178,41 @@ namespace UIRefresh.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(MatchMakerAcceptScreen), "Show", new System.Type[] { typeof(ISession), typeof(RaidSettings), typeof(RaidSettings)});
+            return AccessTools.Method(typeof(MatchMakerAcceptScreen), "Show", new System.Type[] { typeof(ISession), typeof(RaidSettings), typeof(RaidSettings) });
         }
 
         [PatchPostfix]
         static void Postfix(MatchMakerAcceptScreen __instance)
         {
-            // Deactiavtes text on top and time/weather pannel.
+            if (Plugin.HideOutMainMenuConfig.Value)
+            {
+                GameObject fpsCAM = Plugin.FindRootObject("CommonUIScene", "FPS Camera");
+                if (fpsCAM == null)
+                {
+                    fpsCAM = Plugin.FindRootObject("MenuUIScene", "FPS Camera");
+                }
+                fpsCAM.SetActive(true);
+            }
+
+
+
+
+            PreloaderUI preloaderUI = MonoBehaviourSingleton<PreloaderUI>.Instance;
+            preloaderUI.SetMenuTaskBarVisibility(true);
+
+            var taskbar = preloaderUI.transform.Find("Preloader UI/BottomPanel/Content/TaskBar/");
+            if (taskbar != null)
+            {
+                taskbar.GetComponent<MenuTaskBar>().SetButtonsInteractable(true);
+            }
+            else
+            {
+                Logger.LogError("taskbarnuill");
+            }
+            var backButton = __instance.transform.Find("ScreenDefaultButtons");
+            backButton.gameObject.SetActive(false);
+
             __instance.transform.Find("CaptionsHolder").gameObject.SetActive(false);
-            //__instance.transform.Find("Conditions Panel").gameObject.SetActive(false);
 
             // Adjust player model
             var previewPanel = __instance.transform.Find("PreviewsPanel");
@@ -172,35 +237,52 @@ namespace UIRefresh.Patches
         }
 
         [PatchPostfix]
-        static void Postfix(MatchmakerBannersPanel ____bannersPanel, PlayerModelView ____playerModelView, MatchmakerTimeHasCome __instance)
+        static void Postfix(MatchmakerBannersPanel ____bannersPanel, MatchmakerTimeHasCome __instance)
         {
+            PreloaderUI preloaderUI = MonoBehaviourSingleton<PreloaderUI>.Instance;
+            EnvironmentUI envirmonmentUI = Singleton<EnvironmentUI>.Instance;
+            var raidInfoStartPannelGO = envirmonmentUI.transform.Find("Preloader UI/Preloader UI/RaidStartIntroPanel/");
+            //var raidStartIntroInst = raidInfoStartPannelGO.GetComponent<RaidStartIntro>();
+
             var locationNamePanel = __instance.transform.Find("Location Name Panel");
             var locationNameGUI = locationNamePanel.gameObject.transform.Find("Name").GetComponent<CustomTextMeshProUGUI>();
-
             var accentColor = Plugin.GetMapColor(locationNameGUI.text);
+
+            if (Plugin.HideOutMainMenuConfig.Value)
+            {
+                envirmonmentUI.gameObject.SetActive(true);
+                GameObject fpsCAM = Plugin.FindRootObject("CommonUIScene", "FPS Camera");
+                fpsCAM.SetActive(false);
+            }
 
             //Deactivate banner, logo, tips, and loading spinner.
             var bannerPanel = ____bannersPanel.gameObject;
-                if (bannerPanel != null)
-                {
-                bannerPanel.gameObject.SetActive(false); 
-                }
+            if (bannerPanel != null)
+            {
+                bannerPanel.gameObject.SetActive(false);
+            }
 
+            // Hide Header Text
             var captionsHolder = __instance.transform.Find("CaptionsHolder");
             if (captionsHolder != null)
             {
                 captionsHolder.gameObject.SetActive(false);
             }
 
+            //Hide EFT Logo
             var logo = __instance.transform.Find("Logo");
-            if(logo != null)
+            if (logo != null)
             {
                 logo.gameObject.SetActive(false);
             }
 
+            //Hide Loading Spinner
             var loader = __instance.transform.Find("Loader");
-                loader.gameObject.SetActive(false);
-
+            if (loader != null)
+            {
+                loader.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(925, 30);
+                //loader.gameObject.SetActive(false);
+            }
 
             //Other Players in Raid list - move
             var partyInfoPanel = __instance.transform.Find("PartyInfoPanel");
@@ -208,6 +290,7 @@ namespace UIRefresh.Patches
             {
                 partyInfoPanel.GetComponent<RectTransform>().localPosition = new Vector2(-922, 550);
             }
+
             //Map Name - move, increase font, set background to match.
             if (locationNamePanel != null)
             {
@@ -276,7 +359,6 @@ namespace UIRefresh.Patches
             }
 
             //Removes Bottom Task Bar
-            PreloaderUI preloaderUI = MonoBehaviourSingleton<PreloaderUI>.Instance;
             if (preloaderUI == null)
             {
                 Logger.LogError("preloaderUI Null");
@@ -285,7 +367,7 @@ namespace UIRefresh.Patches
             preloaderUI.SetMenuTaskBarVisibility(false);
 
             //Hides WTT Menu Background Plane:
-            var customPlane = Singleton<EnvironmentUI>.Instance.transform.Find("EnvironmentUISceneFactory/FactoryLayout/CustomPlane/");
+            var customPlane = envirmonmentUI.transform.Find("EnvironmentUISceneFactory/FactoryLayout/CustomPlane/");
             if (customPlane != null)
             {
                 Logger.LogError("Enabling UI backgound");
@@ -314,7 +396,7 @@ namespace UIRefresh.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(MatchmakerFinalCountdown), "Show", new System.Type[] { typeof(Profile), typeof(DateTime)});
+            return AccessTools.Method(typeof(MatchmakerFinalCountdown), "Show", new System.Type[] { typeof(Profile), typeof(DateTime) });
         }
 
         [PatchPostfix]
@@ -415,23 +497,23 @@ namespace UIRefresh.Patches
         public static void Postfix(Dictionary<EMenuType, AnimatedToggle> ____toggleButtons, Dictionary<EMenuType,
                    HoverTooltipArea> ____hoverTooltipAreas, ref GameObject[] ____newInformation)
         {
-                GameObject fleaMarketGameObject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/FleaMarket");
-                if (fleaMarketGameObject != null)
+            GameObject fleaMarketGameObject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/FleaMarket");
+            if (fleaMarketGameObject != null)
+            {
+                GameObject MapButtonGameObject = GameObject.Instantiate(fleaMarketGameObject);
+                MapButtonGameObject.name = "Map";
+                MapButtonGameObject.transform.SetParent(fleaMarketGameObject.transform.parent, false);
+                MapButtonGameObject.transform.SetSiblingIndex(3);
+
+                GameObject MapButton = MapButtonGameObject.transform.GetChild(0).gameObject;
+                MapButton.name = "Map";
+
+                LocalizedText text = MapButtonGameObject.GetComponentInChildren<LocalizedText>();
+                if (text != null)
                 {
-                    GameObject MapButtonGameObject = GameObject.Instantiate(fleaMarketGameObject);
-                    MapButtonGameObject.name = "Map";
-                    MapButtonGameObject.transform.SetParent(fleaMarketGameObject.transform.parent, false);
-                    MapButtonGameObject.transform.SetSiblingIndex(4);
-
-                    GameObject MapButton = MapButtonGameObject.transform.GetChild(0).gameObject;
-                    MapButton.name = "Map";
-
-                    LocalizedText text = MapButtonGameObject.GetComponentInChildren<LocalizedText>();
-                    if (text != null)
-                    {
                     text.LocalizationKey = "";
                     text.method_2("Map");
-                    }
+                }
 
                 GameObject mapListObject = GameObject.Find("Common UI/Common UI/InventoryScreen/Tab Bar/Tabs/Map/Normal/Icon/");
                 if (mapListObject != null)
@@ -459,21 +541,21 @@ namespace UIRefresh.Patches
                                 var sideSelectionMenuGO = GameObject.Find("Menu UI/UI/MatchMaker Side Selection Screen/");
                                 var sideSelectionInst = sideSelectionMenuGO.transform.GetComponent<MatchMakerSideSelectionScreen>();
 
-                                    AccessTools.Field(typeof(MatchMakerSideSelectionScreen), "esideType_0").SetValue(sideSelectionInst, ESideType.Pmc);
-                                    TarkovApplication.Exist(out TarkovApplication tarkovApp);
-                                    if (tarkovApp != null)
+                                AccessTools.Field(typeof(MatchMakerSideSelectionScreen), "esideType_0").SetValue(sideSelectionInst, ESideType.Pmc);
+                                TarkovApplication.Exist(out TarkovApplication tarkovApp);
+                                if (tarkovApp != null)
+                                {
+                                    var menuOperation = AccessTools.Field(tarkovApp.GetType(), "_menuOperation").GetValue(tarkovApp) as MainMenuControllerClass;
+                                    if (menuOperation != null)
                                     {
-                                        var menuOperation = AccessTools.Field(tarkovApp.GetType(), "_menuOperation").GetValue(tarkovApp) as MainMenuControllerClass;
-                                        if (menuOperation != null)
-                                        {
-                                            menuOperation.ShowScreen(EMenuType.Play, true);
-                                        }
-                                        sideSelectionInst.method_18();
+                                        menuOperation.ShowScreen(EMenuType.Play, true);
                                     }
+                                    sideSelectionInst.method_18();
+                                }
                             }
                             catch (Exception ex)
                             {
-                            Logger.LogError(ex);
+                                Logger.LogError(ex);
                             }
                         });
                     }
@@ -526,21 +608,109 @@ namespace UIRefresh.Patches
         }
     }
 
-    // Shows PTT Location on Map
-    internal class PTTLocationPatch : ModulePatch
+    // Hide Group buttons on Taskbar
+    internal class HideGroupPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(MatchMakerAcceptScreen), "Show", new System.Type[] { typeof(ISession), typeof(RaidSettings), typeof(RaidSettings) });
+            return typeof(MenuTaskBar).GetMethod(nameof(MenuTaskBar.Awake));
         }
 
         [PatchPostfix]
-        static void Postfix(MatchMakerAcceptScreen __instance)
+        static void Postfix(MenuTaskBar __instance)
         {
-
 
         }
     }
 
 
+    // Show Hideout in Main Menu
+    internal class MenuScreenShowPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(MenuScreen), "Show", new System.Type[] { typeof(Profile), typeof(MatchmakerPlayerControllerClass), typeof(ESessionMode) });
+        }
+
+        [PatchPostfix]
+        static void Postfix(MenuScreen __instance, EnvironmentUI ___environmentUI_0)
+        {
+
+            if (Plugin.HideOutMainMenuConfig.Value)
+            {
+                ___environmentUI_0.gameObject.SetActive(false);
+
+                GameObject FPSCamera = Plugin.FindRootObject("CommonUIScene", "FPS Camera");
+                if (FPSCamera == null)
+                {
+                    FPSCamera = Plugin.FindRootObject("MenuUIScene", "FPS Camera");
+                }
+                if (FPSCamera == null)
+                {
+                    __instance.method_8(EMenuType.Hideout);
+                }
+                if (FPSCamera != null)
+                {
+                    FPSCamera.gameObject.SetActive(true);
+
+                    return;
+                }
+                Logger.LogError("FPS Camera Null");
+            }
+
+            if (Plugin.DisableGroupConfig.Value)
+            {
+                GameObject groupPannel = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/GroupPanel/");
+                if (groupPannel != null)
+                {
+                    groupPannel.gameObject.SetActive(false);
+                }
+            }
+
+        }
+
+        internal class ShowHideoutAreaPatch : ModulePatch
+        {
+            protected override MethodBase GetTargetMethod()
+            {
+                return AccessTools.Method(typeof(HideoutScreenOverlay), "Show", new System.Type[] { typeof(HideoutPlayerOwner), typeof(bool), typeof(ISession), typeof(AreaData[]), typeof(HideoutScreenRear) });
+            }
+
+            [PatchPostfix]
+            static void Postfix(HideoutScreenOverlay __instance)
+            {
+                Logger.LogError("Showhideoutpatchfire");
+
+                var areaToFocus = GameObject.Find("Common UI/Common UI/HideoutScreenRear/HideoutScreenOverlay/BottomAreasPanel/Scroll View/Viewport/Content/").transform.GetChild(2).GetComponent<AreaPanel>();
+                if (areaToFocus != null)
+                {
+                    var field = AccessTools.Field(areaToFocus.GetType(), "areaData_0");
+                    var areaData = (AreaData)field.GetValue(areaToFocus);
+                    __instance.method_10(areaData);
+                    return;
+                }
+                Logger.LogError("areatoFocusNull");
+
+            }
+        }
+
+
+        // Shows PTT Location on Map
+        internal class PTTLocationPatch : ModulePatch
+        {
+            protected override MethodBase GetTargetMethod()
+            {
+                return AccessTools.Method(typeof(MatchMakerAcceptScreen), "Show", new System.Type[] { typeof(ISession), typeof(RaidSettings), typeof(RaidSettings) });
+            }
+
+            [PatchPostfix]
+            static void Postfix(MatchMakerAcceptScreen __instance)
+            {
+
+
+            }
+        }
+
+
+    }
 }
