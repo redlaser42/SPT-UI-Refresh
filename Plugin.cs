@@ -1,8 +1,11 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using EFT;
 using EFT.Hideout;
+using EFT.UI;
 using EFT.UI.Matchmaker;
+using HarmonyLib;
 using HarmonyLib.Tools;
 using System;
 using System.Collections.Generic;
@@ -10,7 +13,6 @@ using System.Reflection;
 using UIRefresh.Patches;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static UIRefresh.Patches.MenuScreenShowPatch;
 
 namespace UIRefresh
 {
@@ -18,21 +20,23 @@ namespace UIRefresh
         public class Plugin : BaseUnityPlugin
         {
 
+
         public static ManualLogSource? LogSource;
 
         public static ConfigEntry<bool>? EnableClockPatchConfig;
-        public static ConfigEntry<bool>? EnableQuickSlotsConfig;
-        public static ConfigEntry<bool>? EnableHideStanceConfig;
-        public static ConfigEntry<bool>? EnableMapConfig;
+        public static ConfigEntry<bool>? HideQuickSlotsConfig;
+        public static ConfigEntry<bool>? StanceSillhouetteConfig;
+        public static ConfigEntry<bool>? MapOnTaskBarConfig;
         public static ConfigEntry<bool>? PTTLocationNameConfig;
         public static ConfigEntry<bool>? HideBackgoundpPatch;
         public static ConfigEntry<bool>? DisableGroupConfig;
         public static ConfigEntry<bool>? HideOutMainMenuConfig;
         public static ConfigEntry<bool>? SkipPreRaidMenusConfig;
+        public static ConfigEntry<bool>? MenuLayoutChangesConfig;
 
 
 
-        public bool isMainMenuSetup = false;
+        public static GameObject locationMenuObj = null;
 
 
 
@@ -48,49 +52,50 @@ namespace UIRefresh
         public static ConfigEntry<Color> LabsColorConfig { get; set; }
 
 
-
+        public static bool initOnce = false;
 
         public static ConfigEntry<float>? CharacterZoom;
 
 
         private void Awake()
             {
-            new SideSelectionPatch().Enable();
-            new LocationSelectionShowPatch().Enable();
-            new RaidSettingsScreenShowPatch().Enable();
-            new InsuranceScreenPatch().Enable();
-            new AcceptLocationPatch().Enable();
-            new TimeHasComeShowPatch().Enable();
-            new FinalCountdownPatch().Enable();
-            new MenuScreenShowPatch().Enable();
 
-
-            CustomsColorConfig = Config.Bind("Colors","Customs Color", new Color(0.56f, 0.51f, 0.15f), ".");
-            FactoryColorConfig = Config.Bind("Colors", "Factory Color", new Color(1, .49f, .01f), ".");
-            WoodsColorConfig = Config.Bind("Colors", "Woods Color", new Color(0.01f, 0.35f, 0.07f), ".");
-            InterchangeColorConfig = Config.Bind("Colors", "Interchange Color", new Color(0.16f, 0.18f, 1), ".");
-            ReserveColorConfig = Config.Bind("Colors", "Reserve Color", new Color(0.58f, 0.08f, 0.03f), ".");
-            ShorelineColorConfig = Config.Bind("Colors", "Shoreline Color", new Color(1, 1, 0.54f), ".");
-            LighthouseColorConfig = Config.Bind("Colors", "Lighthouse Color", new Color (0.01f, 0.3f, 0.23f), ".");
-            GroundZeroColorConfig = Config.Bind("Colors", "Ground Zero Color", new Color(0.47f, 0.63f, 0.64f), ".");
-            StreetsColorConfig = Config.Bind("Colors", "Streets Color", new Color(0.61f, 1, 0.48f), ".");
-            LabsColorConfig = Config.Bind("Colors", "Labs Color", new Color(1, 1, 1), ".");
+            CustomsColorConfig = Config.Bind("Loading Screen Accent Colors","Customs", new Color(0.56f, 0.51f, 0.15f), ".");
+            FactoryColorConfig = Config.Bind("Loading Screen Accent Colors", "Factory", new Color(1, .49f, .01f), ".");
+            WoodsColorConfig = Config.Bind("Loading Screen Accent Colors", "Woods", new Color(0.01f, 0.35f, 0.07f), ".");
+            InterchangeColorConfig = Config.Bind("Loading Screen Accent Colors", "Interchange", new Color(0.16f, 0.18f, 1), ".");
+            ReserveColorConfig = Config.Bind("Loading Screen Accent Colors", "Reserve", new Color(0.58f, 0.08f, 0.03f), ".");
+            ShorelineColorConfig = Config.Bind("Loading Screen Accent Colors", "Shoreline", new Color(1, 1, 0.54f), ".");
+            LighthouseColorConfig = Config.Bind("Loading Screen Accent Colors", "Lighthouse", new Color (0.01f, 0.3f, 0.23f), ".");
+            GroundZeroColorConfig = Config.Bind("Loading Screen Accent Colors", "Ground Zero", new Color(0.47f, 0.63f, 0.64f), ".");
+            StreetsColorConfig = Config.Bind("Loading Screen Accent Colors", "Streets", new Color(0.61f, 1, 0.48f), ".");
+            LabsColorConfig = Config.Bind("Loading Screen Accent Colors", "Labs", new Color(1, 1, 1), ".");
 
 
             DisableGroupConfig = Config.Bind(
-            "Menu UI",                // Section name
-            "Disable Group Widget",       // Setting key
+            "1. Menu UI",                // Section name
+            "c. Disable Group Widget",       // Setting key
             true,                     // Default value
             "Disables the Group buttons on the Task Bar."
             );
             if (DisableGroupConfig.Value)
             {
-                new HideGroupPatch().Enable();
+            }
+
+
+            MenuLayoutChangesConfig = Config.Bind(
+            "1. Menu UI",                // Section name
+            "a. Menu Layout Changes",       // Setting key
+            true,                     // Default value
+            "Enables the various edits to the layouts of menus."
+            );
+            if (DisableGroupConfig.Value)
+            {
             }
 
             SkipPreRaidMenusConfig = Config.Bind(
-            "Menu UI",                // Section name
-            "Skip Pre-Raid Menus",       // Setting key
+            "1. Menu UI",                // Section name
+            "b. Skip Pre-Raid Menus",       // Setting key
             true,                     // Default value
             "Skips Raid Settings and Insurance Menus."
             );
@@ -99,63 +104,63 @@ namespace UIRefresh
             }
 
             EnableClockPatchConfig = Config.Bind(
-                "Menu UI",                // Section name
-                "Enable Clock Widget",       // Setting key
+                "1. Menu UI",                // Section name
+                "d. Enable Clock Widget",       // Setting key
                 true,                     // Default value
                 "Enable or disable the raid clock widget."
             );
             if (EnableClockPatchConfig.Value)
             {
-                new ClockPatch().Enable();
+                new InventoryScreen_ShowPatch().Enable();
             }
 
-            EnableQuickSlotsConfig = Config.Bind(
-                "HUD",                // Section name
-                "Hide Quick Slots",       // Setting key
+            HideQuickSlotsConfig = Config.Bind(
+                "2. HUD",                // Section name
+                "a. Hide Quick Slots",       // Setting key
                 true,                     // Default value
                 "Hides the Quick Access slot UI in the HUD."
             );
-            if (EnableQuickSlotsConfig.Value)
+            if (HideQuickSlotsConfig.Value)
             {
-                new QuickSlotsHUDPatch().Enable();
             }
 
-            EnableHideStanceConfig = Config.Bind(
-            "HUD",                // Section name
-            "Hide Stance Guy",       // Setting key
-            false,                     // Default value
+            StanceSillhouetteConfig = Config.Bind(
+            "2. HUD",                // Section name
+            "b. Hide Stance Guy",       // Setting key
+            true,                     // Default value
             "Hides the Stance Silhouette."
 );
-            if (EnableHideStanceConfig.Value)
+            if (StanceSillhouetteConfig.Value)
             {
-                new StanceSilhouettePatch().Enable();
             }
 
-            EnableMapConfig = Config.Bind(
-                "Menu UI",                // Section name
-                "Enable Map Button",       // Setting key
+            MapOnTaskBarConfig = Config.Bind(
+                "1. Menu UI",                // Section name
+                "e. Enable Map Button",       // Setting key
                 true,                     // Default value
                 "Enable or disable the Map button on the Taskbar."
             );
-            if (EnableMapConfig.Value)
+            if (MapOnTaskBarConfig.Value)
             {
-                new MapOnTaskBarPatch().Enable();
+                new MenuTaskBar_AwakePatch().Enable();
             }
 
 
             HideOutMainMenuConfig = Config.Bind(
-            "Beta",                // Section name
-            "Show Hideout in Main Menu",       // Setting key
+            "z. Beta",                // Section name
+            "a. Show Hideout in Main Menu",       // Setting key
             false,                     // Default value
             "Shows the Hideout in the main menu."
             );
             if (HideOutMainMenuConfig.Value)
             {
+                new HideoutOverlay_ShowPatch().Enable();
+                new LocationScreen_AwakePatch().Enable();
             }
 
             PTTLocationNameConfig = Config.Bind(
-                "Beta",                // Section name
-                "Enable PTT Location Name",       // Setting key
+                "z. Beta",                // Section name
+                "b. Enable PTT Location Name",       // Setting key
                 false,                     // Default value
                 "Shows your Path To Tarkov out-of-raid location on the map."
             );
@@ -163,35 +168,46 @@ namespace UIRefresh
             {
                 new PTTLocationPatch().Enable();
             }
+
+            new SideSelectionPatch().Enable();
+            new LocationSelectionShowPatch().Enable();
+            new RaidSettingsScreen_ShowPatch().Enable();
+            new InsuranceScreenPatch().Enable();
+            new AcceptLocationPatch().Enable();
+            new TimeHasComeShowPatch().Enable();
+            new FinalCountdownPatch().Enable();
+            new MenuScreen_ShowPatch().Enable();
+            new QuickSlotsHUD_ShowPatch().Enable();
+
             }
 
 
-        public static Color GetMapColor(string mapName)
+        public static ConfigEntry<Color> GetMapColorConfig(string mapName)
         {
             switch (mapName)
             {
                 case "Factory":
-                    return Plugin.FactoryColorConfig.Value;
+                    return Plugin.FactoryColorConfig;
                 case "Customs":
-                    return Plugin.CustomsColorConfig.Value;
+                    return Plugin.CustomsColorConfig;
                 case "Woods":
-                    return Plugin.WoodsColorConfig.Value;
+                    return Plugin.WoodsColorConfig;
                 case "Interchange":
-                    return Plugin.InterchangeColorConfig.Value;
+                    return Plugin.InterchangeColorConfig;
                 case "Reserve":
-                    return Plugin.ReserveColorConfig.Value;
+                    return Plugin.ReserveColorConfig;
                 case "Shoreline":
-                    return Plugin.ShorelineColorConfig.Value;
+                    return Plugin.ShorelineColorConfig;
                 case "Lighthouse":
-                    return Plugin.LighthouseColorConfig.Value;
+                    return Plugin.LighthouseColorConfig;
                 case "Ground Zero":
-                    return Plugin.GroundZeroColorConfig.Value;
+                    return Plugin.GroundZeroColorConfig;
                 case "Streets of Tarkov":
-                    return Plugin.StreetsColorConfig.Value;
+                    return Plugin.StreetsColorConfig;
                 case "Labs":
-                    return Plugin.LabsColorConfig.Value;
+                    return Plugin.LabsColorConfig;
                 default:
-                    return Color.white; // fallback if map name not recognized
+                    return LabsColorConfig; // fallback if map name not recognized
             }
         }
 
@@ -219,5 +235,67 @@ namespace UIRefresh
 
             return null; // Not found
         }
+
+        public static void focusHideoutArea(HideoutScreenOverlay instance, int area)
+        {
+        
+            var areaToFocus = GameObject.Find("Common UI/Common UI/HideoutScreenRear/HideoutScreenOverlay/BottomAreasPanel/Scroll View/Viewport/Content/").transform.GetChild(area).GetComponent<AreaPanel>();
+            if (areaToFocus != null)
+            {
+                instance.method_13(areaToFocus);
+                return;
+            }
+        
+        }
+
+        public static void callTarkovMenu(EMenuType menu)
+        {
+            TarkovApplication.Exist(out TarkovApplication tarkovApp);
+            if (tarkovApp != null)
+            {
+                var menuOperation = AccessTools.Field(tarkovApp.GetType(), "_menuOperation").GetValue(tarkovApp) as MainMenuControllerClass;
+                if (menuOperation != null)
+                {
+                    menuOperation.ShowScreen(menu, true);
+                    return;
+                }
+            }
+        }
+
+        public static void findLocationAcceptMenu() 
+        {
+            Plugin.locationMenuObj = GameObject.Find("Menu UI/UI/Location Selection Screen/");
+        }
+
+
+        public static class RandomHelper
+        {
+            private static readonly System.Random rng = new System.Random();
+
+            // Pass in any number of ints, returns one at random
+            public static int PickRandom(params int[] values)
+            {
+                if (values == null || values.Length == 0)
+                    throw new ArgumentException("Must provide at least one value.", nameof(values));
+
+                int index = rng.Next(values.Length); // random index
+                return values[index];
+            }
+        }
+
+        public class MenuWatcher : MonoBehaviour
+        {
+            public System.Action? OnMenuDisabled;
+
+            private void OnDisable()
+            {
+                // Called when this GameObject is deactivated
+                OnMenuDisabled?.Invoke();
+            }
+        }
+
+
+
+
     }
     }
