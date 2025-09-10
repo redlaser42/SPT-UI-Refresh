@@ -94,7 +94,6 @@ namespace UIRefresh.Patches
         {
             if (Plugin.mapOnTaskBarConfig.Value)
             {
-
                 GameObject fleaMarketGameObject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/FleaMarket");
                 if (fleaMarketGameObject != null)
                 {
@@ -153,9 +152,6 @@ namespace UIRefresh.Patches
                                         animatedToggle.Boolean_0 = false;
                                     };
 
-
-
-
                                     AccessTools.Field(typeof(MatchMakerSideSelectionScreen), "esideType_0").SetValue(sideSelectionInst, ESideType.Pmc);
 
                                     TarkovApplication.Exist(out TarkovApplication tarkovApp);
@@ -175,7 +171,6 @@ namespace UIRefresh.Patches
                                         }
                                     }
                                 }
-
                                 catch (Exception ex)
                                 {
                                     Logger.LogError(ex);
@@ -234,7 +229,6 @@ namespace UIRefresh.Patches
                 __instance.transform.Find("CaptionsHolder").gameObject.SetActive(true);
                 __instance.transform.Find("Description").gameObject.SetActive(true);
             }
-
         }
     }
 
@@ -265,7 +259,6 @@ namespace UIRefresh.Patches
                 locationInfo.Find("DescriptionPanel").GetChild(1).GetChild(2).gameObject.SetActive(false);
                 locationInfo.Find("DescriptionPanel").GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 40);
 
-
                 var map = __instance.transform.Find("Content").GetChild(1);
                 map.GetComponent<RectTransform>().anchoredPosition = new Vector2(950, 100);
                 map.GetComponent<RectTransform>().sizeDelta = new Vector2(796, 0);
@@ -273,7 +266,6 @@ namespace UIRefresh.Patches
             else
             {
                 __instance.transform.Find("CaptionsHolder").gameObject.SetActive(true);
-
             }
         }
     }
@@ -348,8 +340,6 @@ namespace UIRefresh.Patches
                 }
                 return;
             }
-
-
         }
     }
 
@@ -659,7 +649,6 @@ namespace UIRefresh.Patches
                 Plugin.focusHideoutArea(__instance, areatoFocus);
             }
             Plugin.initOnce = true;
-
         }
     }
 
@@ -682,7 +671,6 @@ namespace UIRefresh.Patches
     //Clock Patch
     internal class InventoryScreen_ShowPatch : ModulePatch
     {
-
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(typeof(InventoryScreen), "Show", new System.Type[] { typeof(IHealthController), typeof(InventoryController), typeof(AbstractQuestControllerClass), typeof(AbstractAchievementControllerClass), typeof(GClass3695), typeof(CompoundItem), typeof(EInventoryTab), typeof(ISession), typeof(ItemContextAbstractClass), typeof(Boolean) });
@@ -713,7 +701,6 @@ namespace UIRefresh.Patches
                 newClockText.fontSize = 38;
                 clockWidget.GetComponent<RectTransform>().anchoredPosition = new Vector2(170, -395);
             }
-
         }
     }
     
