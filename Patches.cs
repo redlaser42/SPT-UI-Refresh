@@ -21,9 +21,175 @@ using Color = UnityEngine.Color;
 
 namespace UIRefresh.Patches
 {
+    //Main Menu Show Patch. Hides groups and other things
+    internal class MenuScreen_ShowPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(MenuScreen), "Show", new System.Type[] { typeof(Profile), typeof(MatchmakerPlayerControllerClass), typeof(ESessionMode) });
+        }
 
-    //SCAV or PMC Selection Menu
-    internal class SideSelectionPatch : ModulePatch
+        [PatchPostfix]
+        static void Postfix(MenuScreen __instance, EnvironmentUI ___environmentUI_0)
+        {
+
+            // Show Hideout in Main Menu
+            if (Plugin.HideOutMainMenuConfig.Value)
+            {
+                ___environmentUI_0.ShowEnvironment(false);
+
+                GameObject FPSCamera = Plugin.FindRootObject("CommonUIScene", "FPS Camera");
+                if (FPSCamera == null)
+                {
+                    FPSCamera = Plugin.FindRootObject("MenuUIScene", "FPS Camera");
+                }
+                if (FPSCamera == null)
+                {
+                    FPSCamera = Plugin.FindRootObject("DontDestroyOnLoad", "FPS Camera");
+                }
+                if (FPSCamera == null && !Plugin.initOnce)
+                {
+                    __instance.method_8(EMenuType.Hideout);
+                    Plugin.initOnce = true;
+                }
+                if (FPSCamera != null)
+                {
+                    FPSCamera.gameObject.SetActive(true);
+
+                    return;
+                }
+                Logger.LogError("FPS Camera Null");
+                ___environmentUI_0.ShowEnvironment(true);
+
+            }
+            else
+            {
+                ___environmentUI_0.ShowEnvironment(true);
+            }
+
+            // Hide Group buttons on Taskbar
+            if (Plugin.DisableGroupConfig.Value)
+            {
+                GameObject groupPannel = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/GroupPanel/");
+                if (groupPannel != null)
+                {
+                    groupPannel.gameObject.SetActive(false);
+                }
+            }
+
+        }
+    }
+
+    //Add Map to Taskbar
+    internal class MenuTaskBar_AwakePatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return typeof(MenuTaskBar).GetMethod(nameof(MenuTaskBar.Awake));
+        }
+
+        [PatchPostfix]
+        public static void Postfix(Dictionary<EMenuType, AnimatedToggle> ____toggleButtons, Dictionary<EMenuType,
+                   HoverTooltipArea> ____hoverTooltipAreas, ref GameObject[] ____newInformation)
+        {
+            if (Plugin.mapOnTaskBarConfig.Value)
+            {
+
+                GameObject fleaMarketGameObject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/FleaMarket");
+                if (fleaMarketGameObject != null)
+                {
+                    GameObject MapButtonGameObject = GameObject.Instantiate(fleaMarketGameObject);
+
+                    MapButtonGameObject.name = "MAP Object";
+                    MapButtonGameObject.transform.SetParent(fleaMarketGameObject.transform.parent, false);
+                    MapButtonGameObject.transform.SetSiblingIndex(3);
+
+                    GameObject MapButton = MapButtonGameObject.transform.GetChild(0).gameObject;
+                    MapButton.name = "Map Button";
+
+                    LocalizedText text = MapButtonGameObject.GetComponentInChildren<LocalizedText>();
+                    if (text != null)
+                    {
+                        text.LocalizationKey = "";
+                        text.method_2(Plugin.mapButtonTextConfig.Value);
+                    }
+
+                    GameObject mapListObject = GameObject.Find("Common UI/Common UI/InventoryScreen/Tab Bar/Tabs/Map/Normal/Icon/");
+                    if (mapListObject != null)
+                    {
+                        Image FoundmapImage = mapListObject.GetComponent<Image>();
+                        Image MapButtonSprite = MapButtonGameObject.transform.GetChild(0).transform.GetChild(0).gameObject.GetComponent<Image>();
+
+                        if (MapButtonSprite != null && FoundmapImage != null)
+                        {
+                            MapButtonSprite.sprite = FoundmapImage.sprite;
+                        }
+
+                        AnimatedToggle animatedToggle = MapButtonGameObject.GetComponentInChildren<AnimatedToggle>();
+
+                        //Bind MAP button action and SFX.
+                        if (animatedToggle != null)
+                        {
+
+                            animatedToggle.onValueChanged.AddListener(async (arg) =>
+                            {
+                                try
+                                {
+                                    Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
+
+                                    GameObject menuObj = GameObject.Find("Menu UI/UI/Matchmaker Location Selection/");
+                                    if (menuObj == null)
+                                    {
+                                        Logger.LogError("Map Menu Null");
+                                    }
+
+                                    var sideSelectionMenuGO = GameObject.Find("Menu UI/UI/MatchMaker Side Selection Screen/");
+                                    var sideSelectionInst = sideSelectionMenuGO.transform.GetComponent<MatchMakerSideSelectionScreen>();
+
+                                    var watcher = menuObj.gameObject.AddComponent<Plugin.MenuWatcher>();
+                                    watcher.OnMenuDisabled = () =>
+                                    {
+                                        Debug.Log("Menu was disabled, run my custom logic!");
+                                        animatedToggle.Boolean_0 = false;
+                                    };
+
+
+
+
+                                    AccessTools.Field(typeof(MatchMakerSideSelectionScreen), "esideType_0").SetValue(sideSelectionInst, ESideType.Pmc);
+
+                                    TarkovApplication.Exist(out TarkovApplication tarkovApp);
+                                    if (tarkovApp != null)
+                                    {
+                                        var menuOperation = AccessTools.Field(tarkovApp.GetType(), "_menuOperation").GetValue(tarkovApp) as MainMenuControllerClass;
+                                        if (menuOperation != null)
+                                        {
+                                            if (menuObj.activeInHierarchy)
+                                            {
+                                                menuOperation.ShowScreen(EMenuType.MainMenu, true);
+                                                return;
+                                            }
+
+                                            menuOperation.ShowScreen(EMenuType.Play, true);
+                                            sideSelectionInst.method_18();
+                                        }
+                                    }
+                                }
+
+                                catch (Exception ex)
+                                {
+                                    Logger.LogError(ex);
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // 1. SCAV or PMC Selection Menu
+    internal class SideSelection_ShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -72,8 +238,8 @@ namespace UIRefresh.Patches
         }
     }
 
-    // Level Select Map Menu
-    internal class LocationSelectionShowPatch : ModulePatch
+    // 2. Level Select Map Menu
+    internal class LocationSelection_ShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -112,7 +278,7 @@ namespace UIRefresh.Patches
         }
     }
 
-    //Offline Raid Settings Menu
+    // 3. Offline Raid Settings Menu
     internal class RaidSettingsScreen_ShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -145,8 +311,8 @@ namespace UIRefresh.Patches
         }
     }
 
-    //Insurance Menu
-    internal class InsuranceScreenPatch : ModulePatch
+    // 4. Insurance Menu
+    internal class InsuranceScreen_ShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -187,7 +353,7 @@ namespace UIRefresh.Patches
         }
     }
 
-    //Accept Location Menu
+    // 5. Accept Location Menu
     internal class AcceptLocationPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -212,7 +378,6 @@ namespace UIRefresh.Patches
                 backButton.gameObject.SetActive(false);
             }
 
-
             if(MenuLayoutChangesConfig.Value) 
             {
                 __instance.transform.Find("CaptionsHolder").gameObject.SetActive(false);
@@ -234,8 +399,8 @@ namespace UIRefresh.Patches
         }
     }
 
-    //Raid Loading Screen
-    internal class TimeHasComeShowPatch : ModulePatch
+    // 6. Raid Loading Screen
+    internal class TimeHasCome_ShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -387,8 +552,8 @@ namespace UIRefresh.Patches
         }
     }
 
-    // "Deploying In.." Screen
-    internal class FinalCountdownPatch : ModulePatch
+    // 7."Deploying In.." Screen
+    internal class FinalCountdown_ShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -407,6 +572,110 @@ namespace UIRefresh.Patches
                 EnvironmentUI environmentUI = MonoBehaviourSingleton<EnvironmentUI>.Instance;
                 environmentUI.gameObject.SetActive(false);
             }
+        }
+    }
+
+    //HUD Edits
+    internal class QuickSlotsHUD_ShowPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(InventoryScreenQuickAccessPanel), "Show", new System.Type[] { typeof(InventoryController), typeof(ItemUiContext), typeof(GamePlayerOwner), typeof(InsuranceCompanyClass) });
+        }
+
+        [PatchPostfix]
+        static void Postfix(InventoryScreenQuickAccessPanel __instance)
+        {
+            // Hide Quickslot HUD
+            if (Plugin.HideQuickSlotsConfig.Value)
+            {
+                GameObject QuickSlotObject = GameObject.Find("Common UI/Common UI/EFTBattleUIScreen Variant/QuickAccessPanel/");
+                if (QuickSlotObject != null)
+                {
+                    QuickSlotObject.transform.GetChild(0).gameObject.SetActive(false);
+                    QuickSlotObject.transform.GetChild(1).gameObject.SetActive(false);
+                }
+
+                Plugin.HideQuickSlotsConfig.SettingChanged += (s, e) =>
+                {
+                    if (QuickSlotObject.transform.GetChild(0).gameObject.activeInHierarchy)
+                    {
+                        QuickSlotObject.transform.GetChild(0).gameObject.SetActive(false);
+                        QuickSlotObject.transform.GetChild(1).gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        QuickSlotObject.transform.GetChild(0).gameObject.SetActive(true);
+                        QuickSlotObject.transform.GetChild(1).gameObject.SetActive(true);
+                    }
+                };
+            }
+
+            // Hide Character Stance HUD
+            if (Plugin.StanceSillhouetteConfig.Value)
+            {
+                GameObject BattleStanceObject = GameObject.Find("Common UI/Common UI/EFTBattleUIScreen Variant/BattleStancePanel/");
+                if (BattleStanceObject != null)
+                {
+                    BattleStanceObject.transform.GetChild(1).gameObject.SetActive(false);
+                    BattleStanceObject.transform.GetChild(3).gameObject.SetActive(false);
+                    BattleStanceObject.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                }
+
+                Plugin.StanceSillhouetteConfig.SettingChanged += (s, e) =>
+                {
+                    if (BattleStanceObject.transform.GetChild(1).gameObject.activeInHierarchy)
+                    {
+                        BattleStanceObject.transform.GetChild(1).gameObject.SetActive(false);
+                        BattleStanceObject.transform.GetChild(3).gameObject.SetActive(false);
+                        BattleStanceObject.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        BattleStanceObject.transform.GetChild(1).gameObject.SetActive(true);
+                        BattleStanceObject.transform.GetChild(3).gameObject.SetActive(true);
+                        BattleStanceObject.transform.GetChild(0).GetChild(1).gameObject.SetActive(true);
+                    }
+                };
+            }
+        }
+    }
+
+    //Auto selects/focuses a hideout area on first load
+    internal class HideoutOverlay_ShowPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(HideoutScreenOverlay), "Show", new System.Type[] { typeof(HideoutPlayerOwner), typeof(bool), typeof(ISession), typeof(AreaData[]), typeof(HideoutScreenRear) });
+        }
+
+        [PatchPostfix]
+        static void Postfix(HideoutScreenOverlay __instance)
+        {
+            int areatoFocus = 2;
+
+            if (!Plugin.initOnce)
+            {
+                Plugin.focusHideoutArea(__instance, areatoFocus);
+            }
+            Plugin.initOnce = true;
+
+        }
+    }
+
+    //Reactivates Envirmont UI when leaving Raid
+    internal class SessionResultExitStatus_ShowPatch : ModulePatch
+    {
+        protected override MethodBase GetTargetMethod()
+        {
+            return AccessTools.Method(typeof(SessionResultExitStatus), "Show", new System.Type[] { typeof(Profile), typeof(GClass1952), typeof(ESideType), typeof(ExitStatus), typeof(TimeSpan), typeof(ISession), typeof(bool) });
+        }
+
+        [PatchPostfix]
+        static void Postfix(SessionResultExperienceCount __instance)
+        {
+            EnvironmentUI environmentUI = MonoBehaviourSingleton<EnvironmentUI>.Instance;
+            environmentUI.gameObject.SetActive(true);
         }
     }
 
@@ -447,280 +716,7 @@ namespace UIRefresh.Patches
 
         }
     }
-
-    //Add Map to Taskbar
-    internal class MenuTaskBar_AwakePatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(MenuTaskBar).GetMethod(nameof(MenuTaskBar.Awake));
-        }
-
-        [PatchPostfix]
-        public static void Postfix(Dictionary<EMenuType, AnimatedToggle> ____toggleButtons, Dictionary<EMenuType,
-                   HoverTooltipArea> ____hoverTooltipAreas, ref GameObject[] ____newInformation)
-        {
-            if (Plugin.mapOnTaskBarConfig.Value)
-            {
-
-                GameObject fleaMarketGameObject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/FleaMarket");
-                if (fleaMarketGameObject != null)
-                {
-                    GameObject MapButtonGameObject = GameObject.Instantiate(fleaMarketGameObject);
-
-                    MapButtonGameObject.name = "MAP Object";
-                    MapButtonGameObject.transform.SetParent(fleaMarketGameObject.transform.parent, false);
-                    MapButtonGameObject.transform.SetSiblingIndex(3);
-
-                    GameObject MapButton = MapButtonGameObject.transform.GetChild(0).gameObject;
-                    MapButton.name = "Map Button";
-
-                    LocalizedText text = MapButtonGameObject.GetComponentInChildren<LocalizedText>();
-                    if (text != null)
-                    {
-                        text.LocalizationKey = "";
-                        text.method_2(Plugin.mapButtonTextConfig.Value);
-                    }
-
-                    GameObject mapListObject = GameObject.Find("Common UI/Common UI/InventoryScreen/Tab Bar/Tabs/Map/Normal/Icon/");
-                    if (mapListObject != null)
-                    {
-                        Image FoundmapImage = mapListObject.GetComponent<Image>();
-                        Image MapButtonSprite = MapButtonGameObject.transform.GetChild(0).transform.GetChild(0).gameObject.GetComponent<Image>();
-
-                        if (MapButtonSprite != null && FoundmapImage != null)
-                        {
-                            MapButtonSprite.sprite = FoundmapImage.sprite;
-                        }
-
-                        AnimatedToggle animatedToggle = MapButtonGameObject.GetComponentInChildren<AnimatedToggle>();
-
-                        //Bind MAP button action and SFX.
-                        if (animatedToggle != null)
-                        {
-
-                            animatedToggle.onValueChanged.AddListener(async (arg) =>
-                            {
-                                try
-                                {
-                                    Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
-
-                                    GameObject menuObj = GameObject.Find("Menu UI/UI/Matchmaker Location Selection/");
-                                    if (menuObj == null)
-                                    {
-                                        Logger.LogError("Map Menu Null");
-                                    }
-
-                                    var sideSelectionMenuGO = GameObject.Find("Menu UI/UI/MatchMaker Side Selection Screen/");
-                                    var sideSelectionInst = sideSelectionMenuGO.transform.GetComponent<MatchMakerSideSelectionScreen>();
-
-                                    var watcher = menuObj.gameObject.AddComponent<Plugin.MenuWatcher>();
-                                    watcher.OnMenuDisabled = () =>
-                                    {
-                                        Debug.Log("Menu was disabled, run my custom logic!");
-                                        animatedToggle.Boolean_0 = false;
-                                    };
-                                    
-
-
-
-                                    AccessTools.Field(typeof(MatchMakerSideSelectionScreen), "esideType_0").SetValue(sideSelectionInst, ESideType.Pmc);
-
-                                    TarkovApplication.Exist(out TarkovApplication tarkovApp);
-                                    if (tarkovApp != null)
-                                    {
-                                        var menuOperation = AccessTools.Field(tarkovApp.GetType(), "_menuOperation").GetValue(tarkovApp) as MainMenuControllerClass;
-                                        if (menuOperation != null)
-                                        {
-                                            if (menuObj.activeInHierarchy)
-                                            {
-                                                menuOperation.ShowScreen(EMenuType.MainMenu, true);
-                                                return;
-                                            }
-
-                                            menuOperation.ShowScreen(EMenuType.Play, true);
-                                            sideSelectionInst.method_18();
-                                        }
-                                    }
-                                }
-
-                                catch (Exception ex)
-                                {
-                                    Logger.LogError(ex);
-                                }
-                            });
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    internal class QuickSlotsHUD_ShowPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(InventoryScreenQuickAccessPanel), "Show", new System.Type[] { typeof(InventoryController), typeof(ItemUiContext), typeof(GamePlayerOwner), typeof(InsuranceCompanyClass) });
-        }
-
-        [PatchPostfix]
-        static void Postfix(InventoryScreenQuickAccessPanel __instance)
-        {
-            // Hide Quickslot HUD
-            if (Plugin.HideQuickSlotsConfig.Value)
-            {
-                GameObject QuickSlotObject = GameObject.Find("Common UI/Common UI/EFTBattleUIScreen Variant/QuickAccessPanel/");
-                if (QuickSlotObject != null)
-                {
-                    QuickSlotObject.transform.GetChild(0).gameObject.SetActive(false);
-                    QuickSlotObject.transform.GetChild(1).gameObject.SetActive(false);
-                }
-
-                Plugin.HideQuickSlotsConfig.SettingChanged += (s, e) =>
-                {
-                    if (QuickSlotObject.transform.GetChild(0).gameObject.activeInHierarchy)
-                    {
-                        QuickSlotObject.transform.GetChild(0).gameObject.SetActive(false);
-                        QuickSlotObject.transform.GetChild(1).gameObject.SetActive(false);
-                    }
-                    else
-                    {
-                        QuickSlotObject.transform.GetChild(0).gameObject.SetActive(true);
-                        QuickSlotObject.transform.GetChild(1).gameObject.SetActive(true);
-                    }
-                };
-
-
-
-            }
-
-            // Hide Character Stance HUD
-            if (Plugin.StanceSillhouetteConfig.Value)
-            {
-
-                GameObject BattleStanceObject = GameObject.Find("Common UI/Common UI/EFTBattleUIScreen Variant/BattleStancePanel/");
-                if (BattleStanceObject != null)
-                {
-                    BattleStanceObject.transform.GetChild(1).gameObject.SetActive(false);
-                    BattleStanceObject.transform.GetChild(3).gameObject.SetActive(false);
-                    BattleStanceObject.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
-                }
-
-                Plugin.StanceSillhouetteConfig.SettingChanged += (s, e) =>
-                {
-                    if (BattleStanceObject.transform.GetChild(1).gameObject.activeInHierarchy)
-                    {
-                        BattleStanceObject.transform.GetChild(1).gameObject.SetActive(false);
-                        BattleStanceObject.transform.GetChild(3).gameObject.SetActive(false);
-                        BattleStanceObject.transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
-                    }
-                    else
-                    {
-                        BattleStanceObject.transform.GetChild(1).gameObject.SetActive(true);
-                        BattleStanceObject.transform.GetChild(3).gameObject.SetActive(true);
-                        BattleStanceObject.transform.GetChild(0).GetChild(1).gameObject.SetActive(true);
-                    }
-                };
-            }
-        }
-    }
-
-    internal class MenuScreen_ShowPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(MenuScreen), "Show", new System.Type[] { typeof(Profile), typeof(MatchmakerPlayerControllerClass), typeof(ESessionMode) });
-        }
-
-        [PatchPostfix]
-        static void Postfix(MenuScreen __instance, EnvironmentUI ___environmentUI_0)
-        {
-
-            // Show Hideout in Main Menu
-            if (Plugin.HideOutMainMenuConfig.Value)
-            {
-                ___environmentUI_0.ShowEnvironment(false);
-
-                GameObject FPSCamera = Plugin.FindRootObject("CommonUIScene", "FPS Camera");
-                if (FPSCamera == null)
-                {
-                    FPSCamera = Plugin.FindRootObject("MenuUIScene", "FPS Camera");
-                }
-                if (FPSCamera == null)
-                {
-                    FPSCamera = Plugin.FindRootObject("DontDestroyOnLoad", "FPS Camera");
-                }
-                if (FPSCamera == null && !Plugin.initOnce)
-                {
-                    __instance.method_8(EMenuType.Hideout);
-                    Plugin.initOnce = true;
-                }
-                if (FPSCamera != null)
-                {
-                    FPSCamera.gameObject.SetActive(true);
-
-                    return;
-                }
-                Logger.LogError("FPS Camera Null");
-                ___environmentUI_0.ShowEnvironment(true);
-
-            }
-            else
-            {
-                ___environmentUI_0.ShowEnvironment(true);
-            }
-
-            // Hide Group buttons on Taskbar
-            if (Plugin.DisableGroupConfig.Value)
-            {
-                GameObject groupPannel = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/GroupPanel/");
-                if (groupPannel != null)
-                {
-                    groupPannel.gameObject.SetActive(false);
-                }
-            }
-
-        }
-    }
-
-    internal class HideoutOverlay_ShowPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(HideoutScreenOverlay), "Show", new System.Type[] { typeof(HideoutPlayerOwner), typeof(bool), typeof(ISession), typeof(AreaData[]), typeof(HideoutScreenRear) });
-        }
-
-        [PatchPostfix]
-        static void Postfix(HideoutScreenOverlay __instance)
-        {
-            int areatoFocus = Plugin.RandomHelper.PickRandom(2, 6);
-
-            if (!Plugin.initOnce)
-            {
-                Plugin.focusHideoutArea(__instance, areatoFocus);
-            }
-            Plugin.initOnce = true;
-
-        }
-    }
-
-
-    //Reactivates Envirmont UI if using Hide Menu Background In Raid
-    internal class SessionResultExitStatus_ShowPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(SessionResultExitStatus), "Show", new System.Type[] { typeof(Profile), typeof(GClass1952), typeof(ESideType), typeof(ExitStatus), typeof(TimeSpan), typeof(ISession), typeof(bool) });
-        }
-
-        [PatchPostfix]
-        static void Postfix(SessionResultExperienceCount __instance)
-        {
-            EnvironmentUI environmentUI = MonoBehaviourSingleton<EnvironmentUI>.Instance;
-            environmentUI.gameObject.SetActive(true);
-        }
-    }
-
+    
     //Hideout Area Pannel Edits
     internal class AreaScreenSubstrate_AwakePatch : ModulePatch
     {
@@ -737,21 +733,6 @@ namespace UIRefresh.Patches
             __instance.transform.Find("CaptionPanel").GetComponent<Image>().enabled = false;
             __instance.transform.Find("Content/NextLevel/BottomPanel/").GetComponent<Image>().enabled = false;
             __instance.transform.Find("Content/CurrentLevel/BottomPanel/").GetComponent<Image>().enabled = false;
-        }
-    }
-
-
-    internal class PTTLocationPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(MatchMakerAcceptScreen), "Show", new System.Type[] { typeof(ISession), typeof(RaidSettings), typeof(RaidSettings) });
-        }
-
-        [PatchPostfix]
-        static void Postfix(MatchMakerAcceptScreen __instance)
-        {
-
         }
     }
 }
