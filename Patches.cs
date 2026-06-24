@@ -157,7 +157,7 @@ namespace UIRefresh.Patches
                                     TarkovApplication.Exist(out TarkovApplication tarkovApp);
                                     if (tarkovApp != null)
                                     {
-                                        var menuOperation = AccessTools.Field(tarkovApp.GetType(), "_menuOperation").GetValue(tarkovApp) as MainMenuControllerClass;
+                                        var menuOperation = AccessTools.Field(tarkovApp.GetType(), "mainMenuControllerClass").GetValue(tarkovApp) as MainMenuControllerClass;
                                         if (menuOperation != null)
                                         {
                                             if (menuObj.activeInHierarchy)
@@ -308,7 +308,7 @@ namespace UIRefresh.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(MatchmakerInsuranceScreen), "Show", new System.Type[] { typeof(IHealthController), typeof(InventoryController), typeof(ISession) });
+            return AccessTools.Method(typeof(MatchmakerInsuranceScreen), "Show", new System.Type[] { typeof(AbstractQuestControllerClass), typeof(IHealthController), typeof(InventoryController), typeof(ISession) });
         }
 
         [PatchPostfix]
@@ -673,7 +673,7 @@ namespace UIRefresh.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(InventoryScreen), "Show", new System.Type[] { typeof(IHealthController), typeof(InventoryController), typeof(AbstractQuestControllerClass), typeof(AbstractAchievementControllerClass), typeof(GClass3695), typeof(CompoundItem), typeof(EInventoryTab), typeof(ISession), typeof(ItemContextAbstractClass), typeof(Boolean) });
+            return AccessTools.Method(typeof(InventoryScreen), "Show", new System.Type[] { typeof(IHealthController), typeof(InventoryController), typeof(AbstractQuestControllerClass), typeof(AbstractAchievementControllerClass), typeof(AbstractPrestigeControllerClass), typeof(CompoundItem), typeof(EInventoryTab), typeof(ISession), typeof(ItemContextAbstractClass), typeof(Boolean) });
         }
 
         [PatchPostfix]
