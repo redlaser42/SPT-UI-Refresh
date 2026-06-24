@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 
 namespace UIRefresh
 {
-        [BepInPlugin("redlaser42.UI_Refresh", "redlaser42.UI_Refresh", "1.0.0")]
+        [BepInPlugin("redlaser42.UI_Refresh", "redlaser42.UI_Refresh", "2.0.0")]
         public class Plugin : BaseUnityPlugin
         {
         // _____________________________Define Config Options_____________________________
@@ -104,7 +104,8 @@ namespace UIRefresh
             new TimeHasCome_ShowPatch().Enable();
             new FinalCountdown_ShowPatch().Enable();
             new MenuScreen_ShowPatch().Enable();
-            new QuickSlotsHUD_ShowPatch().Enable();
+            new HideTopGlowPatch().Enable();
+            //new QuickSlotsHUD_ShowPatch().Enable();
             new SessionResultExitStatus_ShowPatch().Enable();
             }
 
