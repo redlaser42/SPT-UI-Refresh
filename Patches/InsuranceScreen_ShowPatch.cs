@@ -39,7 +39,7 @@ namespace UIRefresh.Patches
 
             if (Plugin.HideOutMainMenuConfig.Value)
             {
-                GameObject fpsCAM = Plugin.FindFPSCam();
+                GameObject fpsCAM = Utils.FindFPSCam();
                 if (fpsCAM != null)
                 {
                     fpsCAM.SetActive(true);

@@ -102,29 +102,12 @@ namespace UIRefresh.Patches
 
             if (!Plugin.initOnce)
             {
-                Plugin.focusHideoutArea(__instance, areatoFocus);
+                Utils.focusHideoutArea(__instance, areatoFocus);
             }
             Plugin.initOnce = true;
         }
     }
-
-    //Reactivates Envirmont UI when leaving Raid
-    internal class SessionResultExitStatus_ShowPatch : ModulePatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(SessionResultExitStatus), "Show", new System.Type[] { typeof(Profile), typeof(GClass1952), typeof(ESideType), typeof(ExitStatus), typeof(TimeSpan), typeof(ISession), typeof(bool) });
-        }
-
-        [PatchPostfix]
-        static void Postfix(SessionResultExperienceCount __instance)
-        {
-            EnvironmentUI environmentUI = MonoBehaviourSingleton<EnvironmentUI>.Instance;
-            environmentUI.gameObject.SetActive(true);
-        }
-    }
-
-   
+  
     
     //Hideout Area Pannel Edits
     internal class AreaScreenSubstrate_AwakePatch : ModulePatch

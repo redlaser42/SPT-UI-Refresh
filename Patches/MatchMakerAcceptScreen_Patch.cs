@@ -9,7 +9,7 @@ using UnityEngine;
 namespace UIRefresh.Patches
 {
     // 5. Accept Location Menu
-    internal class AcceptLocationPatch : ModulePatch
+    internal class MatchMakerAcceptScreen_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -43,7 +43,7 @@ namespace UIRefresh.Patches
 
             if (Plugin.HideOutMainMenuConfig.Value)
             {
-                GameObject fpsCAM = Plugin.FindFPSCam();
+                GameObject fpsCAM = Utils.FindFPSCam();
                 if (fpsCAM != null)
                 {
                     fpsCAM.SetActive(true);

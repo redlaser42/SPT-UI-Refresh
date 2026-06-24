@@ -30,14 +30,14 @@ namespace UIRefresh.Patches
                 {
                     //If exisiting
                     var clockText = existingClock.GetComponent<TMPro.TextMeshProUGUI>();
-                    clockText.text = Plugin.GetRaidTime(___iSession);
+                    clockText.text = Utils.GetRaidTime(___iSession);
                     return;
                 }
                 //Create for first time
                 var clockWidget = new GameObject("Clock Widget");
                 clockWidget.transform.SetParent(clockParent, false);
                 var newClockText = clockWidget.AddComponent<TMPro.TextMeshProUGUI>();
-                newClockText.text = Plugin.GetRaidTime(___iSession);
+                newClockText.text = Utils.GetRaidTime(___iSession);
                 newClockText.fontSize = 38;
                 clockWidget.GetComponent<RectTransform>().anchoredPosition = new Vector2(170, -395);
             }

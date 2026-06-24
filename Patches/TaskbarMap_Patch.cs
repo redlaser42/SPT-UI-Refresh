@@ -79,7 +79,7 @@ namespace UIRefresh.Patches
                                     var sideSelectionMenuGO = GameObject.Find("Menu UI/UI/MatchMaker Side Selection Screen/");
                                     var sideSelectionInst = sideSelectionMenuGO.transform.GetComponent<MatchMakerSideSelectionScreen>();
 
-                                    var watcher = menuObj.gameObject.AddComponent<Plugin.MenuWatcher>();
+                                    var watcher = menuObj.gameObject.AddComponent<Utils.MenuWatcher>();
                                     watcher.OnMenuDisabled = () =>
                                     {
                                         Debug.Log("Menu was disabled, run my custom logic!");
