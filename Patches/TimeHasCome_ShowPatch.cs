@@ -59,8 +59,8 @@ namespace UIRefresh.Patches
                 var loader = __instance.transform.Find("Loader");
                 if (loader != null)
                 {
-                    loader.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(925, 30);
-                    //loader.gameObject.SetActive(false);
+                    //loader.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(925, 30);
+                    loader.gameObject.SetActive(false);
                 }
 
                 //Other Players in Raid list - move

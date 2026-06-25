@@ -20,6 +20,7 @@ namespace UIRefresh.Patches
         static void Postfix(MenuScreen __instance, GameObject ____alphaWarningGameObject)
         {
             warningBanner = ____alphaWarningGameObject;
+            UpdateBetaBanner();
         }
         public static void UpdateBetaBanner()
         {

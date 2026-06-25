@@ -13,7 +13,7 @@ namespace UIRefresh
     public static ConfigEntry<bool>? EnableClockPatchConfig;
     public static ConfigEntry<bool>? ClockUsesSystemTimeConfig;
     public static ConfigEntry<bool>? HideQuickSlotsConfig;
-    public static ConfigEntry<bool>? HideStanceSillhouette;
+    public static ConfigEntry<bool>? ShowStanceSillhouette;
     public static ConfigEntry<bool>? HideBackgoundpPatch;
     public static ConfigEntry<bool>? DisableGroupConfig;
     public static ConfigEntry<bool>? HideOutMainMenuConfig;
@@ -77,16 +77,19 @@ namespace UIRefresh
         }
 
 
-        HideStanceSillhouette = Config.Bind("2. HUD", "b. Show Stance Guy", false, "Hides/Shows the Stance Silhouette.(Restart)");
+        ShowStanceSillhouette = Config.Bind("2. HUD", "b. Show Stance Guy", false, "Hides/Shows the Stance Silhouette.(Restart)");
         mapOnTaskBarConfig = Config.Bind("General", "f. Enable Map Button", true, "Enable or disable the Map button on the Taskbar.");
-        new MenuTaskBar_AwakePatch().Enable();
-        HideStanceSillhouette.SettingChanged += delegate (object sender, EventArgs e)
-            {
-            QuickSlotsHUD_ShowPatch.StanceSillhouetteUpdate();
-            };
-
-
         mapButtonTextConfig = Config.Bind("General", "c. Map button Text", "MAP", "The text that appears on the Map button.(Restart)");
+        new MenuTaskBar_AwakePatch().Enable();
+
+
+        new BattleStancePanel_ShowPatch().Enable();
+        ShowStanceSillhouette.SettingChanged += delegate (object sender, EventArgs e)
+        {
+        BattleStancePanel_ShowPatch.StanceSillhouetteUpdate();
+        };
+
+
         ChangeUISceneOnLoading = Config.Bind("General", "g. Map Specific Loading Screen", true, "Changes the background scene when loading a raid per map.(Restart)");
         HideMenuBackgroundInRaid = Config.Bind("General", "b. Hide Menu Background In Raid", true, "Hides the pause menu background when you are in a raid.(Restart)");
         HideOutMainMenuConfig = Config.Bind("z. Beta", "a. Show Hideout in Main Menu", false, "Shows the Hideout in the main menu.(Restart)");
