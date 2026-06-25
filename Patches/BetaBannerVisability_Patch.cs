@@ -8,8 +8,9 @@ using UnityEngine.UI;
 namespace UIRefresh.Patches
 {
     //Hides the big orange banner in the main menu.
-    internal class HideAlphaWarning_Patch : ModulePatch
+    internal class BetaBannerVisability_Patch : ModulePatch
     {
+        public static GameObject warningBanner = null;
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(typeof(MenuScreen), nameof(MenuScreen.method_3));
@@ -18,7 +19,11 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(MenuScreen __instance, GameObject ____alphaWarningGameObject)
         {
-            ____alphaWarningGameObject.SetActive(false);
+            warningBanner = ____alphaWarningGameObject;
+        }
+        public static void UpdateBetaBanner()
+        {
+            warningBanner.SetActive(Plugin.HideBetaBanner.Value);
         }
     }
 }

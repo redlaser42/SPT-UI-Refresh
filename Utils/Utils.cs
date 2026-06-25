@@ -1,5 +1,7 @@
 using BepInEx;
 using BepInEx.Bootstrap;
+using BepInEx.Configuration;
+using EFT;
 using EFT.Hideout;
 using EFT.UI;
 using HarmonyLib;
@@ -20,7 +22,6 @@ public class Utils
         playingFika = false;
         return;
     }
-
 
     //Find objects in a scene that have no parent. 
     public static GameObject FindRootObject(string sceneName, string objectName)
@@ -129,5 +130,75 @@ public class Utils
     {
         EnvironmentUI environmentUI = MonoBehaviourSingleton<EnvironmentUI>.Instance;
         environmentUI.transform.GetChild(2).GetChild(0).gameObject.SetActive(active);
+    }
+
+    public static void setLoadRaidBackground(string mapName)
+    {
+        EnvironmentUI environmentUI = MonoBehaviourSingleton<EnvironmentUI>.Instance;
+
+        switch (mapName)
+        {
+            case "Factory":
+                environmentUI.SetEnvironmentAsync(EEnvironmentUIType.FactoryEnvironmentUiType);
+                return;
+            case "Customs":
+                environmentUI.SetEnvironmentAsync(EEnvironmentUIType.FactoryEnvironmentUiType);
+                return;
+            case "Woods":
+                environmentUI.SetEnvironmentAsync(EEnvironmentUIType.WoodEnvironmentUiType);
+                return;
+            case "Interchange":
+                environmentUI.SetEnvironmentAsync(EEnvironmentUIType.TheUnheardEditionEnvironmentUiType);
+                return;
+            case "Reserve":
+                environmentUI.SetEnvironmentAsync(EEnvironmentUIType.FactoryEnvironmentUiType);
+                return;
+            case "Shoreline":
+                environmentUI.SetEnvironmentAsync(EEnvironmentUIType.WoodEnvironmentUiType);
+                return;
+            case "Lighthouse":
+                environmentUI.SetEnvironmentAsync(EEnvironmentUIType.WoodEnvironmentUiType);
+                return;
+            case "Ground Zero":
+                environmentUI.SetEnvironmentAsync(EEnvironmentUIType.TheUnheardEditionEnvironmentUiType);
+                return;
+            case "Streets of Tarkov":
+                environmentUI.SetEnvironmentAsync(EEnvironmentUIType.LaboratoryEnvironmentUiType);
+                return;
+            case "Labs":
+                environmentUI.SetEnvironmentAsync(EEnvironmentUIType.LaboratoryEnvironmentUiType);
+                return;
+            default:
+                environmentUI.SetEnvironmentAsync(EEnvironmentUIType.FactoryEnvironmentUiType);
+                return;
+        }
+    }
+    public static ConfigEntry<Color> GetMapColorConfig(string mapName)
+    {
+        switch (mapName)
+        {
+            case "Factory":
+                return Plugin.FactoryColorConfig;
+            case "Customs":
+                return Plugin.CustomsColorConfig;
+            case "Woods":
+                return Plugin.WoodsColorConfig;
+            case "Interchange":
+                return Plugin.InterchangeColorConfig;
+            case "Reserve":
+                return Plugin.ReserveColorConfig;
+            case "Shoreline":
+                return Plugin.ShorelineColorConfig;
+            case "Lighthouse":
+                return Plugin.LighthouseColorConfig;
+            case "Ground Zero":
+                return Plugin.GroundZeroColorConfig;
+            case "Streets of Tarkov":
+                return Plugin.StreetsColorConfig;
+            case "Labs":
+                return Plugin.LabsColorConfig;
+            default:
+                return Plugin.LabsColorConfig; // fallback if map name not recognized
+        }
     }
 }

@@ -1,13 +1,16 @@
 using EFT.UI;
 using HarmonyLib;
 using SPT.Reflection.Patching;
+using System;
 using System.Reflection;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace UIRefresh.Patches
 {
     internal class HideTopGlowPatch : ModulePatch
     {
+        public static Image topGlow = null;
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(typeof(EnvironmentUI), nameof(EnvironmentUI.method_0));
@@ -16,7 +19,13 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(Image imageToFadeOut, Image imageToFadeIn, bool forced)
         {
-            imageToFadeIn.gameObject.SetActive(false);
+            topGlow = imageToFadeIn;
+            UpdateTopGlow();
+        }
+
+        public static void UpdateTopGlow()
+        {
+            topGlow.enabled = Plugin.HideTopGlow.Value;
         }
     }
 }

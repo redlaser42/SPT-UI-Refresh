@@ -27,7 +27,7 @@ namespace UIRefresh.Patches
 
             var locationNamePanel = __instance.transform.Find("Location Name Panel");
             var locationNameGUI = locationNamePanel.gameObject.transform.Find("Name").GetComponent<CustomTextMeshProUGUI>();
-            var accentColor = Plugin.GetMapColorConfig(locationNameGUI.text);
+            var accentColor = Utils.GetMapColorConfig(locationNameGUI.text);
 
             if (Plugin.MenuLayoutChangesConfig.Value)
             {
@@ -86,14 +86,14 @@ namespace UIRefresh.Patches
                     locationNamePanel.gameObject.transform.Find("Background").GetComponent<RectTransform>().sizeDelta = new Vector2(450, 150);
                     locationNamePanel.gameObject.transform.Find("Background").GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
 
-                    Plugin.GetMapColorConfig(locationNameGUI.text).SettingChanged += (s, e) =>
+                    Utils.GetMapColorConfig(locationNameGUI.text).SettingChanged += (s, e) =>
                     {
-                        locationNameGUI.color = Plugin.GetMapColorConfig(locationNameGUI.text).Value;
+                        locationNameGUI.color = Utils.GetMapColorConfig(locationNameGUI.text).Value;
                     };
 
                     if (Plugin.ChangeUISceneOnLoading.Value)
                     {
-                        Plugin.setLoadRaidBackground(locationNameGUI.text);
+                        Utils.setLoadRaidBackground(locationNameGUI.text);
                     }
                 }
 
@@ -148,9 +148,9 @@ namespace UIRefresh.Patches
                         //fillLight.GetComponent<Light>().intensity = 0.3;
                         fillLight.GetComponent<Light>().color = accentColor.Value;
 
-                        Plugin.GetMapColorConfig(locationNameGUI.text).SettingChanged += (s, e) =>
+                        Utils.GetMapColorConfig(locationNameGUI.text).SettingChanged += (s, e) =>
                         {
-                            fillLight.GetComponent<Light>().color = Plugin.GetMapColorConfig(locationNameGUI.text).Value;
+                            fillLight.GetComponent<Light>().color = Utils.GetMapColorConfig(locationNameGUI.text).Value;
                         };
                     }
                 }
