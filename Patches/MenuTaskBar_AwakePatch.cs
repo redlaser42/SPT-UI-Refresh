@@ -16,6 +16,8 @@ using UnityEngine.UI;
 namespace UIRefresh.Patches
 {
     //Add Map to Taskbar
+    //This code is from the FIKA menu taskbar patch that adds the Download Profile Button. 
+
     internal class MenuTaskBar_AwakePatch : ModulePatch
     {
         public static LocalizedText? mapButtonText;
