@@ -6,6 +6,7 @@ using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
 using TMPro;
+using UIRefresh.Config;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,14 +23,13 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(MatchmakerBannersPanel ____bannersPanel, MatchmakerTimeHasCome __instance)
         {
-            Plugin.initOnce = false;
             PreloaderUI preloaderUI = MonoBehaviourSingleton<PreloaderUI>.Instance;
 
             var locationNamePanel = __instance.transform.Find("Location Name Panel");
             var locationNameGUI = locationNamePanel.gameObject.transform.Find("Name").GetComponent<CustomTextMeshProUGUI>();
             var accentColor = Utils.GetMapColorConfig(locationNameGUI.text);
 
-            if (Plugin.MenuLayoutChangesConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.MenuLayoutChangesConfig.Value)
             {
                 preloaderUI.SetMenuTaskBarVisibility(false);
 
@@ -67,16 +67,16 @@ namespace UIRefresh.Patches
                 var partyInfoPanel = __instance.transform.Find("PartyInfoPanel");
                 if (partyInfoPanel != null)
                 {
-                    partyInfoPanel.GetComponent<RectTransform>().localPosition = new Vector2(-922, 550);
+                    partyInfoPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -25);
                 }
 
                 //Map Name - move, increase font, set background to match.
                 if (locationNamePanel != null)
                 {
-                    locationNamePanel.gameObject.GetComponent<RectTransform>().localPosition = new Vector2(-850, 950);
+                    locationNamePanel.Find("Name").GetComponent<RectTransform>().anchoredPosition = new Vector2(-990, 100);
 
 
-                    locationNameGUI.alignment = TextAlignmentOptions.Center;
+                    //locationNameGUI.alignment = TextAlignmentOptions.Center;
                     locationNameGUI.fontSize = 130;
 
                     var locationNameText = locationNameGUI.text;
@@ -91,7 +91,7 @@ namespace UIRefresh.Patches
                         locationNameGUI.color = Utils.GetMapColorConfig(locationNameGUI.text).Value;
                     };
 
-                    if (Plugin.ChangeUISceneOnLoading.Value)
+                    if (Plugin.Instance.UIRefreshConfig.ChangeUISceneOnLoading.Value)
                     {
                         Utils.setLoadRaidBackground(locationNameGUI.text);
                     }
@@ -101,15 +101,15 @@ namespace UIRefresh.Patches
                 var deployCaption = __instance.transform.Find("Deploying Caption");
                 if (deployCaption != null)
                 {
-                    deployCaption.gameObject.GetComponent<RectTransform>().position = new Vector3(340, 26, 0);
-                    deployCaption.gameObject.GetComponent<CustomTextMeshProUGUI>().alignment = TextAlignmentOptions.Left;
+                    deployCaption.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(-620, 20);
+                    //deployCaption.gameObject.GetComponent<CustomTextMeshProUGUI>().alignment = TextAlignmentOptions.Left;
                 }
 
                 //Start & Back Button transform:
                 var startBackButton = __instance.transform.Find("Back Button Panel");
                 if (startBackButton != null)
                 {
-                    startBackButton.gameObject.GetComponent<RectTransform>().position = new Vector3(1280, 20, 0);
+                    startBackButton.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 20);
                 }
 
                 //Player Model transform and lights:
@@ -117,9 +117,7 @@ namespace UIRefresh.Patches
                 if (playerModel != null)
                 {
 
-                    playerModel.gameObject.GetComponent<RectTransform>().position = new Vector3(2150f, 0f, 0f);
-                    //playerModel.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(1000, 0f);
-                    //playerModel.gameObject.GetComponent<AspectRatioFitter>().aspectRatio = 3.3f;
+                    playerModel.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(750, 20);
 
                     var playerModelCamera = playerModel.Find("PlayerModelViewObject").Find("Camera_timehascome0");
                     if (playerModelCamera != null)
@@ -155,7 +153,7 @@ namespace UIRefresh.Patches
                     }
                 }
 
-                if (Plugin.HideOutMainMenuConfig.Value)
+                if (Plugin.Instance.UIRefreshConfig.HideOutMainMenuConfig.Value)
                 {
                     Utils.ShowEnvironmentUI(true);
                     Utils.ToggleEnvironmentBackground(true);

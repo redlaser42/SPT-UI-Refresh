@@ -4,9 +4,10 @@ using EFT.UI;
 using EFT.UI.Matchmaker;
 using HarmonyLib;
 using SPT.Reflection.Patching;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
+using UIRefresh.Config;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,6 +18,9 @@ namespace UIRefresh.Patches
     //Add Map to Taskbar
     internal class MenuTaskBar_AwakePatch : ModulePatch
     {
+        public static LocalizedText? mapButtonText;
+
+        public static GameObject? MapButtonGameObject;
         protected override MethodBase GetTargetMethod()
         {
             return typeof(MenuTaskBar).GetMethod(nameof(MenuTaskBar.Awake));
@@ -26,12 +30,11 @@ namespace UIRefresh.Patches
         public static void Postfix(Dictionary<EMenuType, AnimatedToggle> ____toggleButtons, Dictionary<EMenuType,
                    HoverTooltipArea> ____hoverTooltipAreas, ref GameObject[] ____newInformation)
         {
-            if (Plugin.mapOnTaskBarConfig.Value)
-            {
-                GameObject fleaMarketGameObject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/FleaMarket");
-                if (fleaMarketGameObject != null)
+            GameObject fleaMarketGameObject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/FleaMarket");
+            MapButtonGameObject = GameObject.Instantiate(fleaMarketGameObject);
+
+                if (fleaMarketGameObject != null && Plugin.Instance.UIRefreshConfig.mapOnTaskBarConfig.Value)
                 {
-                    GameObject MapButtonGameObject = GameObject.Instantiate(fleaMarketGameObject);
 
                     MapButtonGameObject.name = "MAP Object";
                     MapButtonGameObject.transform.SetParent(fleaMarketGameObject.transform.parent, false);
@@ -40,12 +43,9 @@ namespace UIRefresh.Patches
                     GameObject MapButton = MapButtonGameObject.transform.GetChild(0).gameObject;
                     MapButton.name = "Map Button";
 
-                    LocalizedText text = MapButtonGameObject.GetComponentInChildren<LocalizedText>();
-                    if (text != null)
-                    {
-                        text.LocalizationKey = "";
-                        text.method_2(Plugin.mapButtonTextConfig.Value);
-                    }
+                    mapButtonText = MapButtonGameObject.GetComponentInChildren<LocalizedText>();
+                    mapButtonText.LocalizationKey = "";
+                        UpdateMapButtonText();
 
                     GameObject mapListObject = GameObject.Find("Common UI/Common UI/InventoryScreen/Tab Bar/Tabs/Map/Normal/Icon/");
                     if (mapListObject != null)
@@ -63,7 +63,6 @@ namespace UIRefresh.Patches
                         //Bind MAP button action and SFX.
                         if (animatedToggle != null)
                         {
-
                             animatedToggle.onValueChanged.AddListener(async (arg) =>
                             {
                                 try
@@ -71,20 +70,17 @@ namespace UIRefresh.Patches
                                     Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
 
                                     GameObject menuObj = GameObject.Find("Menu UI/UI/Matchmaker Location Selection/");
-                                    if (menuObj == null)
+                                    if (menuObj != null)
                                     {
-                                        Logger.LogError("Map Menu Null");
+                                        var watcher = menuObj.gameObject.AddComponent<Utils.MenuWatcher>();
+                                        watcher.OnMenuDisabled = () =>
+                                        {
+                                            animatedToggle.Boolean_0 = false;
+                                        };
                                     }
 
                                     var sideSelectionMenuGO = GameObject.Find("Menu UI/UI/MatchMaker Side Selection Screen/");
                                     var sideSelectionInst = sideSelectionMenuGO.transform.GetComponent<MatchMakerSideSelectionScreen>();
-
-                                    var watcher = menuObj.gameObject.AddComponent<Utils.MenuWatcher>();
-                                    watcher.OnMenuDisabled = () =>
-                                    {
-                                        Debug.Log("Menu was disabled, run my custom logic!");
-                                        animatedToggle.Boolean_0 = false;
-                                    };
 
                                     AccessTools.Field(typeof(MatchMakerSideSelectionScreen), "esideType_0").SetValue(sideSelectionInst, ESideType.Pmc);
 
@@ -114,7 +110,18 @@ namespace UIRefresh.Patches
                     }
                 }
             }
+        
+        public static void UpdateMapButtonText()
+        {
+            if (mapButtonText == null)
+            {
+                return;
+            }
+            mapButtonText.method_2(Plugin.Instance.UIRefreshConfig.mapButtonTextConfig.Value);
+        }
+        public static void UpdateMapButtonSelectability()
+        {
+
         }
     }
-
 }

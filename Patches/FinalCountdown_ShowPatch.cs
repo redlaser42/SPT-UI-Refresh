@@ -5,6 +5,7 @@ using HarmonyLib;
 using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
+using UIRefresh.Config;
 
 namespace UIRefresh.Patches
 {
@@ -19,11 +20,11 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(MatchmakerFinalCountdown __instance)
         {
-            if (Plugin.MenuLayoutChangesConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.MenuLayoutChangesConfig.Value)
             {
                 __instance.transform.Find("Logo").gameObject.SetActive(false);
             }
-            if (Plugin.HideMenuBackgroundInRaid.Value)
+            if (Plugin.Instance.UIRefreshConfig.HideMenuBackgroundInRaid.Value)
             {
                 EnvironmentUI environmentUI = MonoBehaviourSingleton<EnvironmentUI>.Instance;
                 environmentUI.gameObject.SetActive(false);

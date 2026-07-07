@@ -6,6 +6,7 @@ using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
 using UnityEngine;
+using UIRefresh.Config;
 
 namespace UIRefresh.Patches
 { //Clock Patch
@@ -19,8 +20,7 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         public static void Postfix(InventoryScreen __instance, ISession ___iSession)
         {
-            // Add Clock to Inventory Screen
-            if (Plugin.EnableClockPatchConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.EnableClockPatchConfig.Value)
             {
                 var clockParent = __instance.transform.GetChild(1).GetChild(0).GetChild(0).GetChild(1);
 

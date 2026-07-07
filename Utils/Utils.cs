@@ -7,6 +7,8 @@ using EFT.UI;
 using HarmonyLib;
 using System;
 using UIRefresh;
+using UIRefresh.Config;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -24,7 +26,7 @@ public class Utils
     }
 
     //Find objects in a scene that have no parent. 
-    public static GameObject FindRootObject(string sceneName, string objectName)
+    public static GameObject? FindRootObject(string sceneName, string objectName)
     {
         Scene scene = SceneManager.GetSceneByName(sceneName);
         if (!scene.isLoaded)
@@ -65,7 +67,7 @@ public class Utils
         }
     }
 
-    public static GameObject FindFPSCam()
+    public static GameObject? FindFPSCam()
     {
         GameObject FPSCamera = FindRootObject("CommonUIScene", "FPS Camera");
         if (FPSCamera == null)
@@ -87,7 +89,7 @@ public class Utils
     public static string GetRaidTime(ISession ___iSession)
     {
         // Does clock use system time?
-        if (Plugin.ClockUsesSystemTimeConfig.Value)
+        if (Plugin.Instance.UIRefreshConfig.ClockUsesSystemTimeConfig.Value)
         {
             return DateTime.Now.ToString("HH:mm:ss");
         }
@@ -178,27 +180,27 @@ public class Utils
         switch (mapName)
         {
             case "Factory":
-                return Plugin.FactoryColorConfig;
+                return Plugin.Instance.UIRefreshConfig.FactoryColorConfig;
             case "Customs":
-                return Plugin.CustomsColorConfig;
+                return Plugin.Instance.UIRefreshConfig.CustomsColorConfig;
             case "Woods":
-                return Plugin.WoodsColorConfig;
+                return Plugin.Instance.UIRefreshConfig.WoodsColorConfig;
             case "Interchange":
-                return Plugin.InterchangeColorConfig;
+                return Plugin.Instance.UIRefreshConfig.InterchangeColorConfig;
             case "Reserve":
-                return Plugin.ReserveColorConfig;
+                return Plugin.Instance.UIRefreshConfig.ReserveColorConfig;
             case "Shoreline":
-                return Plugin.ShorelineColorConfig;
+                return Plugin.Instance.UIRefreshConfig.ShorelineColorConfig;
             case "Lighthouse":
-                return Plugin.LighthouseColorConfig;
+                return Plugin.Instance.UIRefreshConfig.LighthouseColorConfig;
             case "Ground Zero":
-                return Plugin.GroundZeroColorConfig;
+                return Plugin.Instance.UIRefreshConfig.GroundZeroColorConfig;
             case "Streets of Tarkov":
-                return Plugin.StreetsColorConfig;
+                return Plugin.Instance.UIRefreshConfig.StreetsColorConfig;
             case "Labs":
-                return Plugin.LabsColorConfig;
+                return Plugin.Instance.UIRefreshConfig.LabsColorConfig;
             default:
-                return Plugin.LabsColorConfig; // fallback if map name not recognized
+                return Plugin.Instance.UIRefreshConfig.LabsColorConfig; // fallback if map name not recognized
         }
     }
 }

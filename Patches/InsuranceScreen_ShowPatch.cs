@@ -21,7 +21,7 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(MatchmakerInsuranceScreen __instance)
         {
-            if (Plugin.MenuLayoutChangesConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.MenuLayoutChangesConfig.Value)
             {
                 __instance.transform.Find("WarningPanel").gameObject.SetActive(false);
                 __instance.transform.Find("Tab Bar").GetComponent<RectTransform>().anchoredPosition = new Vector2(1, -100);
@@ -31,13 +31,13 @@ namespace UIRefresh.Patches
                 __instance.transform.Find("ItemsToInsurePanel").Find("ItemsToInsureList").GetComponent<RectTransform>().sizeDelta = new Vector2(0f, 490);
             }
 
-            if (Plugin.SkipPreRaidMenusConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.SkipPreRaidMenusConfig.Value)
             {
                 var nextButton = __instance.transform.Find("ScreenDefaultButtons/NextButton/");
                 nextButton.GetComponent<DefaultUIButton>().method_11();
             }
 
-            if (Plugin.HideOutMainMenuConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.HideOutMainMenuConfig.Value)
             {
                 GameObject fpsCAM = Utils.FindFPSCam();
                 if (fpsCAM != null)

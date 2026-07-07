@@ -4,6 +4,7 @@ using EFT.UI.Matchmaker;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
+using UIRefresh.Config;
 
 namespace UIRefresh.Patches
 {
@@ -18,7 +19,7 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(MatchmakerOfflineRaidScreen __instance)
         {
-            if (Plugin.MenuLayoutChangesConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.MenuLayoutChangesConfig.Value)
             {
                 // Deactivates top text and spacers.
                 __instance.transform.Find("Content").Find("Description").gameObject.SetActive(false);
@@ -32,7 +33,7 @@ namespace UIRefresh.Patches
                 __instance.transform.Find("Content").Find("Space (2)").gameObject.SetActive(true);
             }
 
-            if (Plugin.SkipPreRaidMenusConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.SkipPreRaidMenusConfig.Value)
             {
                 var nextButton = __instance.transform.Find("ScreenDefaultButtons/NextButton/");
                 nextButton.GetComponent<DefaultUIButton>().method_11();

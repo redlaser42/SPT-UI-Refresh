@@ -3,14 +3,13 @@ using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace UIRefresh.Patches
 {
     //Hides version number in the bottom left. 
     internal class HideVersionLabelPatch : ModulePatch
     {
-        public static GameObject versionLabel = null;
+        public static GameObject? versionLabel = null;
         
         protected override MethodBase GetTargetMethod()
         {
@@ -25,7 +24,12 @@ namespace UIRefresh.Patches
         }
         public static void UpdateVersionLabel()
         {
-            versionLabel.SetActive(Plugin.VersionLabelVisability.Value);
+            if(Plugin.Instance.UIRefreshConfig.VersionLabelVisability != null)
+            {
+                versionLabel.SetActive(!Plugin.Instance.UIRefreshConfig.VersionLabelVisability.Value);
+                return;
+            }
+            Logger.LogError("Plugin Instance UI Refresh Config Null");
         }
     }
 }

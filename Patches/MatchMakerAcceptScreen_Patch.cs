@@ -4,6 +4,7 @@ using EFT.UI.Matchmaker;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
+using UIRefresh.Config;
 using UnityEngine;
 
 namespace UIRefresh.Patches
@@ -22,7 +23,7 @@ namespace UIRefresh.Patches
             PreloaderUI preloaderUI = MonoBehaviourSingleton<PreloaderUI>.Instance;
             preloaderUI.SetMenuTaskBarVisibility(true);
 
-            if (Plugin.SkipPreRaidMenusConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.SkipPreRaidMenusConfig.Value)
             {
                 var taskbar = preloaderUI.transform.Find("Preloader UI/BottomPanel/Content/TaskBar/").GetComponent<MenuTaskBar>();
                 if (taskbar != null)
@@ -33,7 +34,7 @@ namespace UIRefresh.Patches
                 backButton.gameObject.SetActive(false);
             }
 
-            if (Plugin.MenuLayoutChangesConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.MenuLayoutChangesConfig.Value)
             {
                 __instance.transform.Find("CaptionsHolder").gameObject.SetActive(false);
                 var previewPanel = __instance.transform.Find("PreviewsPanel");
@@ -41,7 +42,7 @@ namespace UIRefresh.Patches
                 previewPanel.transform.Find("CurrentPlayerModelView").Find("PlayerMVObject").Find("Camera_acceptScreen").GetComponent<Transform>().localPosition = new Vector3(0.81f, -0.08f, -1.8f);
             }
 
-            if (Plugin.HideOutMainMenuConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.HideOutMainMenuConfig.Value)
             {
                 GameObject fpsCAM = Utils.FindFPSCam();
                 if (fpsCAM != null)

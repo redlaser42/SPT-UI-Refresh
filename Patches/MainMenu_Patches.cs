@@ -1,9 +1,9 @@
 using EFT;
 using EFT.UI;
-using Fika.Core.UI.Custom;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
+using UIRefresh.Config;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,7 +22,7 @@ namespace UIRefresh.Patches
 		static void Postfix(MenuScreen __instance, EnvironmentUI ___environmentUI_0)
 		{
             // Show Hideout in Main Menu
-            if (Plugin.HideOutMainMenuConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.HideOutMainMenuConfig.Value)
 			{
 				___environmentUI_0.ShowEnvironment(false);
 
@@ -35,34 +35,21 @@ namespace UIRefresh.Patches
 				{
 					FPSCamera = Utils.FindRootObject("DontDestroyOnLoad", "FPS Camera");
 				}
-				if (FPSCamera == null && !Plugin.initOnce)
+				if (FPSCamera == null)
 				{
 					__instance.method_8(EMenuType.Hideout);
-					Plugin.initOnce = true;
 				}
 				if (FPSCamera != null)
 				{
 					FPSCamera.gameObject.SetActive(true);
-
-					return;
+                    return;
 				}
-				Logger.LogError("FPS Camera Null");
 				___environmentUI_0.ShowEnvironment(true);
 
 			}
 			else
 			{
 				___environmentUI_0.ShowEnvironment(true);
-			}
-
-            // Hide Group buttons on Taskbar
-            if (Plugin.DisableGroupConfig.Value)
-			{
-				GameObject groupPannel = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/GroupPanel/");
-				if (groupPannel != null)
-				{
-					groupPannel.gameObject.SetActive(false);
-				}
 			}
         }
 	}

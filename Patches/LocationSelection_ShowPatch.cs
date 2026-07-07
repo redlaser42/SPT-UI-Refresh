@@ -4,12 +4,13 @@ using EFT.UI.Matchmaker;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
+using TMPro;
+using UIRefresh.Config;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace UIRefresh.Patches
 {
-    // 2. Level Select Map Menu
     internal class LocationSelection_ShowPatch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -20,29 +21,32 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(MatchMakerSelectionLocationScreen __instance)
         {
-            if (Plugin.MenuLayoutChangesConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.MenuLayoutChangesConfig.Value)
             {
                 __instance.transform.Find("CaptionsHolder").gameObject.SetActive(false);
+
+                var map = __instance.transform.Find("Content").GetChild(1);
+                map.GetComponent<RectTransform>().anchoredPosition = new Vector2(950, 100);
+                map.GetComponent<RectTransform>().sizeDelta = new Vector2(796, 0);
 
                 var conditionsPannel = __instance.transform.Find("Conditions Panel");
                 conditionsPannel.Find("Tiles").gameObject.SetActive(false);
                 conditionsPannel.GetComponent<Image>().enabled = false;
                 conditionsPannel.GetComponent<RectTransform>().anchoredPosition = new Vector2(-440, 470);
 
-                var locationInfo = __instance.transform.Find("Content").GetChild(0);
-                locationInfo.GetComponent<RectTransform>().anchoredPosition = new Vector2(-800, -100);
-                locationInfo.Find("Banner").GetComponent<RectTransform>().localScale = new Vector3(1.76f, 1.76f, 1);
-                locationInfo.Find("DescriptionPanel").GetChild(0).GetComponent<CustomTextMeshProUGUI>().fontSize = 16;
-                locationInfo.Find("DescriptionPanel").GetChild(1).GetChild(2).gameObject.SetActive(false);
-                locationInfo.Find("DescriptionPanel").GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 40);
+                var locationInfoPanel = __instance.transform.Find("Content").Find("Location Info Panel");
+                locationInfoPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(-800, -100);
+                locationInfoPanel.Find("Banner").GetComponent<RectTransform>().localScale = new Vector3(1.9f, 1.9f, 1);
+                locationInfoPanel.Find("Banner").GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 120);
 
-                var map = __instance.transform.Find("Content").GetChild(1);
-                map.GetComponent<RectTransform>().anchoredPosition = new Vector2(950, 100);
-                map.GetComponent<RectTransform>().sizeDelta = new Vector2(796, 0);
-            }
-            else
-            {
-                __instance.transform.Find("CaptionsHolder").gameObject.SetActive(true);
+                var descriptionPanel = locationInfoPanel.transform.Find("DescriptionPanel");
+                descriptionPanel.Find("Bottom Panel").Find("IconsPanel").Find("Difficulty").gameObject.SetActive(false);
+                descriptionPanel.Find("Bottom Panel").Find("IconsPanel").Find("Players").gameObject.SetActive(false);
+                descriptionPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(-45, 40);
+                
+                var locationDescription = descriptionPanel.Find("Location Description");
+                locationDescription.GetComponent<CustomTextMeshProUGUI>().fontSize = 17;
+                locationDescription.GetComponent<CustomTextMeshProUGUI>().color = new Color(0.7647f, 0.7725f, 0.698f, 1);
             }
         }
     }

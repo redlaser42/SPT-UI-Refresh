@@ -5,6 +5,7 @@ using EFT.UI.Matchmaker;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
+using UIRefresh.Config;
 using UnityEngine;
 
 namespace UIRefresh.Patches
@@ -20,7 +21,7 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(MatchMakerSideSelectionScreen __instance)
         {
-            if (Plugin.MenuLayoutChangesConfig.Value)
+            if (Plugin.Instance.UIRefreshConfig.MenuLayoutChangesConfig.Value)
             {
                 // Deactivates Logo and texts.
                 __instance.transform.Find("CaptionsHolder").gameObject.SetActive(false);

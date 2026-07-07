@@ -2,13 +2,13 @@ using EFT.UI;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
+using UIRefresh.Config;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace UIRefresh.Patches
 {
     //Hides the PVP to PVE toggle button in the bottom right. 
-    internal class HideGameModePatch : ModulePatch
+    internal class HidePVEButton_Patch : ModulePatch
     {
         public static GameObject gamemodeButton = null;
         protected override MethodBase GetTargetMethod()
@@ -24,7 +24,7 @@ namespace UIRefresh.Patches
         }
         public static void UpdateGameModeButton()
         {
-            gamemodeButton.SetActive(Plugin.HideGameModeButton.Value);
+            gamemodeButton.SetActive(!Plugin.Instance.UIRefreshConfig.HidePVEButton.Value);
         }
     }
 }
