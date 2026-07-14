@@ -4,7 +4,7 @@ using UIRefresh.Patches;
 
 namespace UIRefresh
 {
-    [BepInPlugin("com.redlaser42.UI_Refresh", "UI_Refresh", "2.1.0")]
+    [BepInPlugin("com.redlaser42.UI_Refresh", "UI_Refresh", "2.2.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; } = null!;
@@ -48,6 +48,9 @@ namespace UIRefresh
             //HUD edits
             new CharacterHealthPanel_Patch().Enable();
             new BattleStancePanel_ShowPatch().Enable();
+            new GesturesQuickPanel_ShowPatch().Enable();
+            new AmmoPannel_ShowPatch().Enable();
+
 
             //Exiting Raid
             new SessionResultExitStatus_ShowPatch().Enable();
