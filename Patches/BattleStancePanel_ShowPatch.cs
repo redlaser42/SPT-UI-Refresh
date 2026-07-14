@@ -11,6 +11,9 @@ namespace UIRefresh.Patches
     {
         public static GameObject? BattleStanceObject = null;
 
+        public static GameObject? RaidWarningTimerObject = null;
+
+
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(typeof(BattleStancePanel), "Show");
@@ -20,11 +23,13 @@ namespace UIRefresh.Patches
         static void Postfix(BattleStancePanel __instance,Player player)
         {
             BattleStanceObject = GameObject.Find("Common UI/Common UI/EFTBattleUIScreen Variant/BattleStancePanel/Stances/");
+
             if (BattleStanceObject != null)
             {
                 StanceSillhouetteUpdate();
             }
         }
+
         public static void StanceSillhouetteUpdate()
         {
             if (BattleStanceObject != null)
@@ -32,5 +37,5 @@ namespace UIRefresh.Patches
                 BattleStanceObject.SetActive(!Plugin.Instance.UIRefreshConfig.HideStanceSillhouette.Value);
             }
         }
-     }
+    }
 }
