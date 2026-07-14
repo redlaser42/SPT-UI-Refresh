@@ -99,7 +99,10 @@ namespace UIRefresh.Patches
                                             }
 
                                             menuOperation.ShowScreen(EMenuType.Play, true);
-                                            sideSelectionInst.method_18();
+                                            if( sideSelectionInst != null)
+                                            {
+                                                sideSelectionInst.method_18();
+                                            }
                                         }
                                     }
                                 }
