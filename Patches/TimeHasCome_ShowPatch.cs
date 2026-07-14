@@ -67,7 +67,7 @@ namespace UIRefresh.Patches
                 var partyInfoPanel = __instance.transform.Find("PartyInfoPanel");
                 if (partyInfoPanel != null)
                 {
-                    partyInfoPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -25);
+                    partyInfoPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -80);
                 }
 
                 //Map Name - move, increase font, set background to match.
