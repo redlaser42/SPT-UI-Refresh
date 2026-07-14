@@ -98,7 +98,9 @@ public class Utils
             // If Immersive Day Night Cycle is installed, get raid time from helper.
             if (Chainloader.PluginInfos.ContainsKey("Jehree.ImmersiveDaylightCycle"))
             {
-                return TryGetImmersiveTime();
+                return ___iSession.GetCurrentLocationTime.ToString("HH:mm:ss");
+
+                //return TryGetImmersiveTime();
             }
             // Otherwise default  raid time
             return ___iSession.GetCurrentLocationTime.ToString("HH:mm:ss");
