@@ -15,11 +15,11 @@ namespace UIRefresh.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(SessionResultExitStatus), "Show", new System.Type[] { typeof(Profile), typeof(LastPlayerStateClass), typeof(ESideType), typeof(ExitStatus), typeof(TimeSpan), typeof(ISession), typeof(bool) });
+            return AccessTools.Method(typeof(SessionEndUI), "Awake");
         }
 
         [PatchPostfix]
-        static void Postfix(SessionResultExperienceCount __instance)
+        static void Postfix(SessionEndUI __instance)
         {
             EnvironmentUI environmentUI = MonoBehaviourSingleton<EnvironmentUI>.Instance;
             environmentUI.gameObject.SetActive(true);
