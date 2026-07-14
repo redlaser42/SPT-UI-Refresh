@@ -10,6 +10,14 @@ namespace UIRefresh.Config
         public ConfigEntry<bool> EnableClockPatchConfig { get; set; }
         public ConfigEntry<bool> ClockUsesSystemTimeConfig { get; set; }
         public ConfigEntry<bool> HideStanceSillhouette { get; set; }
+        public ConfigEntry<bool> HideGesturesQuickPanel { get; set; }
+        public ConfigEntry<bool> HideRaidTimerWarning { get; set; }
+        public ConfigEntry<bool> HideAmmoPanel { get; set; }
+
+        public ConfigEntry<bool> HideBackpackInventory { get; set; }
+
+
+
         public ConfigEntry<bool> MoveHealthPanelConfig { get; set; }
         public ConfigEntry<bool> HideOutMainMenuConfig { get; set; }
         public ConfigEntry<bool> SkipPreRaidMenusConfig { get; set; }
@@ -71,8 +79,8 @@ namespace UIRefresh.Config
                 BattleStancePanel_ShowPatch.StanceSillhouetteUpdate();
             };
 
-            mapOnTaskBarConfig = config.Bind("General", "Enable Map Button", true, "Enable or disable the Map button on the Taskbar.");
-            mapButtonTextConfig = config.Bind("General", "Map button Text", "MAP", "The text that appears on the Map button.(Restart)");
+            mapOnTaskBarConfig = config.Bind("General", "Enable Deploy Button", true, "Enable or disable the Deploy button on the Taskbar.");
+            mapButtonTextConfig = config.Bind("General", "Deploy Button Text", "DEPOLY", "The text that appears on the Deploy button.");
             mapButtonTextConfig.SettingChanged += delegate (object sender, EventArgs e)
             {
                 MenuTaskBar_AwakePatch.UpdateMapButtonText();
@@ -117,6 +125,31 @@ namespace UIRefresh.Config
             DisableGroupConfig.SettingChanged += delegate (object sender, EventArgs e)
             {
                 HideGroupPanel_Patch.UpdateGroupPanel();
+            };
+            HideGesturesQuickPanel = config.Bind("HUD", "Hide Phrase Prompt", true, "Hides the contextual phrase prompt in raid.");
+            new HideGroupPanel_Patch().Enable();
+            HideGesturesQuickPanel.SettingChanged += delegate (object sender, EventArgs e)
+            {
+                GesturesQuickPanel_ShowPatch.HideGesturesQuickPanelUpdate();
+            };
+            HideRaidTimerWarning = config.Bind("HUD", "Hide Raid Timer Warning", true, "Hides the <10 minute raid timer");
+            new HideGroupPanel_Patch().Enable();
+            HideRaidTimerWarning.SettingChanged += delegate (object sender, EventArgs e)
+            {
+                HideGroupPanel_Patch.UpdateGroupPanel();
+
+            };
+            HideBackpackInventory = config.Bind("HUD", "Hide Backpack Inventory", true, "Makes the backpack inaccessable when on your back.");
+            new HideGroupPanel_Patch().Enable();
+            HideBackpackInventory.SettingChanged += delegate (object sender, EventArgs e)
+            {
+                HideGroupPanel_Patch.UpdateGroupPanel();
+            };
+            HideAmmoPanel = config.Bind("HUD", "Hide Ammo Panel", true, "Hides the range of your sight in the bottom right.");
+            new HideGroupPanel_Patch().Enable();
+            HideAmmoPanel.SettingChanged += delegate (object sender, EventArgs e)
+            {
+                AmmoPannel_ShowPatch.AmmoPanelUpdate();
             };
         }
     }
