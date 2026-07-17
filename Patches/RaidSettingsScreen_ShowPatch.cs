@@ -4,7 +4,6 @@ using EFT.UI.Matchmaker;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
-using UIRefresh.Config;
 
 namespace UIRefresh.Patches
 {

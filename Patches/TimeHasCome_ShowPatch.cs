@@ -5,10 +5,7 @@ using EFT.UI.Matchmaker;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
-using TMPro;
-using UIRefresh.Config;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace UIRefresh.Patches
 {
@@ -67,7 +64,7 @@ namespace UIRefresh.Patches
                 var partyInfoPanel = __instance.transform.Find("PartyInfoPanel");
                 if (partyInfoPanel != null)
                 {
-                    partyInfoPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -80);
+                    partyInfoPanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -110);
                 }
 
                 //Map Name - move, increase font, set background to match.

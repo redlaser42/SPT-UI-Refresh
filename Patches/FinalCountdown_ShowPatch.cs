@@ -5,7 +5,6 @@ using HarmonyLib;
 using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
-using UIRefresh.Config;
 
 namespace UIRefresh.Patches
 {

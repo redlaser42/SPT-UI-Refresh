@@ -43,9 +43,7 @@ namespace UIRefresh.Patches
                 if (fpsCAM != null)
                 {
                     fpsCAM.SetActive(true);
-                    return;
                 }
-                return;
             }
         }
     }

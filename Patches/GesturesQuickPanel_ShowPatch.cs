@@ -20,7 +20,6 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(GesturesQuickPanel __instance)
         {
-            Logger.LogError("Fired Hide Context Prompt");
 
             GesturesQuickPanelObject = __instance.gameObject;
 

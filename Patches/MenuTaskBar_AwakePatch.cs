@@ -7,7 +7,6 @@ using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using UIRefresh.Config;
 using UnityEngine;
 using UnityEngine.UI;
 

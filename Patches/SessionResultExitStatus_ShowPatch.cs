@@ -3,9 +3,7 @@ using EFT.UI;
 using EFT.UI.SessionEnd;
 using HarmonyLib;
 using SPT.Reflection.Patching;
-using System;
 using System.Reflection;
-using UnityEngine.UI;
 
 namespace UIRefresh.Patches
 {

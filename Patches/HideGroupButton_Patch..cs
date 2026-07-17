@@ -11,7 +11,7 @@ namespace UIRefresh.Patches
 {
     internal class HideGroupPanel_Patch : ModulePatch
     {
-        public static GameObject groupPannel = null;
+        public static GameObject groupPannel;
         
         protected override MethodBase GetTargetMethod()
         {
