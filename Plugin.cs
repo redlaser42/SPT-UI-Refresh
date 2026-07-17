@@ -50,6 +50,7 @@ namespace UIRefresh
             new BattleStancePanel_ShowPatch().Enable();
             new GesturesQuickPanel_ShowPatch().Enable();
             new AmmoPannel_ShowPatch().Enable();
+            new ContainersPanelShow_Patch().Enable();
 
 
             //Exiting Raid
