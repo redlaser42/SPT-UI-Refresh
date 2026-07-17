@@ -80,7 +80,7 @@ namespace UIRefresh.Config
             };
 
             mapOnTaskBarConfig = config.Bind("General", "Enable Deploy Button", true, "Enable or disable the Deploy button on the Taskbar.");
-            mapButtonTextConfig = config.Bind("General", "Deploy Button Text", "DEPOLY", "The text that appears on the Deploy button.");
+            mapButtonTextConfig = config.Bind("General", "Location Select Button Text", "DEPLOY", "The text that appears on the Deploy button.");
             mapButtonTextConfig.SettingChanged += delegate (object sender, EventArgs e)
             {
                 MenuTaskBar_AwakePatch.UpdateMapButtonText();
@@ -126,26 +126,26 @@ namespace UIRefresh.Config
             {
                 HideGroupPanel_Patch.UpdateGroupPanel();
             };
-            HideGesturesQuickPanel = config.Bind("HUD", "Hide Phrase Prompt", true, "Hides the contextual phrase prompt in raid.");
+            HideGesturesQuickPanel = config.Bind("HUD", "Hide Phrase Prompt", false, "Hides the contextual phrase prompt in raid.");
             new HideGroupPanel_Patch().Enable();
             HideGesturesQuickPanel.SettingChanged += delegate (object sender, EventArgs e)
             {
                 GesturesQuickPanel_ShowPatch.HideGesturesQuickPanelUpdate();
             };
-            HideRaidTimerWarning = config.Bind("HUD", "Hide Raid Timer Warning", true, "Hides the <10 minute raid timer");
+            HideRaidTimerWarning = config.Bind("HUD", "Hide Raid Timer Warning", true, "Does not work. Hides the <10 minute raid timer");
             new HideGroupPanel_Patch().Enable();
             HideRaidTimerWarning.SettingChanged += delegate (object sender, EventArgs e)
             {
                 HideGroupPanel_Patch.UpdateGroupPanel();
 
             };
-            HideBackpackInventory = config.Bind("HUD", "Hide Backpack Inventory", true, "Makes the backpack inaccessable when on your back.");
+            HideBackpackInventory = config.Bind("HUD", "Backpack Inaccessible on Shoulders", true, "Makes the backpack inaccessable when on your back.");
             new HideGroupPanel_Patch().Enable();
             HideBackpackInventory.SettingChanged += delegate (object sender, EventArgs e)
             {
                 HideGroupPanel_Patch.UpdateGroupPanel();
             };
-            HideAmmoPanel = config.Bind("HUD", "Hide Ammo Panel", true, "Hides the range of your sight in the bottom right.");
+            HideAmmoPanel = config.Bind("HUD", "Hide Ammo Panel", false, "Hides the range of your sight in the bottom right.");
             new HideGroupPanel_Patch().Enable();
             HideAmmoPanel.SettingChanged += delegate (object sender, EventArgs e)
             {
