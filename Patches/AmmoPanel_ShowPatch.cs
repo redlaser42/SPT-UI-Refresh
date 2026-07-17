@@ -22,13 +22,9 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(AmmoCountPanel __instance)
         {
-            Logger.LogError("Fired Ammo Count patch");
 
             AmmoCountPanelObject = __instance.gameObject;
-            AmmoPanel = AmmoCountPanelObject.transform.FindChild("Ammo").gameObject;
-
-            Logger.LogError(AmmoCountPanelObject);
-
+            AmmoPanel = AmmoCountPanelObject.transform.Find("Ammo").gameObject;
 
             if (AmmoPanel != null)
             {
