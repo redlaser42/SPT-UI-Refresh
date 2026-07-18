@@ -12,8 +12,6 @@ namespace UIRefresh.Patches
 {
     internal class ItemsPanelShow_Patch : ModulePatch
     {
-        private static int backpackSlotID = -1;
-
         protected override MethodBase GetTargetMethod()
         {
             return typeof(ItemsPanel).GetMethod(nameof(ItemsPanel.Show));
@@ -27,8 +25,6 @@ namespace UIRefresh.Patches
             if (Plugin.Instance.UIRefreshConfig.HideBackpackInventory.Value && inRaid && !isPlayerLooting)
             {
                 var content = ____containers.transform.Find("Content");
-
-                //backpack slot hasn't quite yet been created yet, so we add a watcher that will find the backpack slot when it get's added. 
                 var backpackWatcher = content.GetComponent<BackpackWatcher>();
 
                 if (backpackWatcher == null)
