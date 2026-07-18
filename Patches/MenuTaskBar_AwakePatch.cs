@@ -36,7 +36,10 @@ namespace UIRefresh.Patches
 
                 if (fleaMarketGameObject != null && Plugin.Instance.UIRefreshConfig.mapOnTaskBarConfig.Value)
                 {
+                    var toggle = MapButtonGameObject.GetComponentInChildren<AnimatedToggle>();
 
+                    Logger.LogInfo("Event Count: "+toggle.onValueChanged.GetPersistentEventCount());
+                    
                     MapButtonGameObject.name = "MAP Object";
                     MapButtonGameObject.transform.SetParent(fleaMarketGameObject.transform.parent, false);
                     MapButtonGameObject.transform.SetSiblingIndex(3);
@@ -46,7 +49,7 @@ namespace UIRefresh.Patches
 
                     mapButtonText = MapButtonGameObject.GetComponentInChildren<LocalizedText>();
                     mapButtonText.LocalizationKey = "";
-                        UpdateMapButtonText();
+                    UpdateMapButtonText();
 
                     GameObject mapListObject = GameObject.Find("Common UI/Common UI/InventoryScreen/Tab Bar/Tabs/Map/Normal/Icon/");
                     if (mapListObject != null)
@@ -73,10 +76,16 @@ namespace UIRefresh.Patches
                                     GameObject menuObj = GameObject.Find("Menu UI/UI/Matchmaker Location Selection/");
                                     if (menuObj != null)
                                     {
-                                        var watcher = menuObj.gameObject.AddComponent<Utils.MenuWatcher>();
+                                        var watcher = menuObj.GetComponent<Utils.MenuWatcher>();
+
+                                        if (watcher == null)
+                                        {
+                                            watcher = menuObj.AddComponent<Utils.MenuWatcher>();
+                                        }
+
                                         watcher.OnMenuDisabled = () =>
                                         {
-                                            animatedToggle.Boolean_0 = false;
+                                            animatedToggle.ToggleSilent(false);
                                         };
                                     }
 
