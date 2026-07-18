@@ -48,9 +48,7 @@ namespace UIRefresh.Patches
 
                 if (canvasGroup != null)
                 {
-                    //canvasGroup = backpackSlotItemView.gameObject.AddComponent<CanvasGroup>();
                     canvasGroup.blocksRaycasts = false;
-                    //canvasGroup.interactable = false;
                 }
             }
         }
