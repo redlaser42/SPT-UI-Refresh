@@ -2,6 +2,7 @@
 using System;
 using UIRefresh.Patches;
 using UnityEngine;
+using static Fika.Core.UI.FikaUIGlobals;
 
 namespace UIRefresh.Config
 {
@@ -10,9 +11,9 @@ namespace UIRefresh.Config
         public ConfigEntry<bool> EnableClockPatchConfig { get; set; }
         public ConfigEntry<bool> ClockUsesSystemTimeConfig { get; set; }
         public ConfigEntry<bool> HideStanceSillhouette { get; set; }
-        public ConfigEntry<bool> HideGesturesQuickPanel { get; set; }
+        public ConfigEntry<float> GesturesQuickPanelAlpha { get; set; }
         public ConfigEntry<bool> HideRaidTimerWarning { get; set; }
-        public ConfigEntry<bool> HideAmmoPanel { get; set; }
+        public ConfigEntry<float> AmmoPanelAlpha { get; set; }
 
         public ConfigEntry<bool> HideBackpackInventory { get; set; }
 
@@ -35,7 +36,7 @@ namespace UIRefresh.Config
 
         public bool initOnce = false;
 
-        public ConfigEntry<string>? mapButtonTextConfig;
+        public ConfigEntry<string>? mapButtonTextConfig { get; set; }
 
         public static GameObject? locationMenuObj = null;
 
@@ -55,16 +56,27 @@ namespace UIRefresh.Config
 
         public UIRefreshConfig(ConfigFile config)
         {
-            CustomsColorConfig = config.Bind("Loading Screen Accent Colors", "Customs", new Color(0.55f, 0.55f, 0.08f), ".");
-            FactoryColorConfig = config.Bind("Loading Screen Accent Colors", "Factory", new Color(0.4f, .12f, .10f), ".");
-            WoodsColorConfig = config.Bind("Loading Screen Accent Colors", "Woods", new Color(0.01f, 0.36f, 0.16f), ".");
-            InterchangeColorConfig = config.Bind("Loading Screen Accent Colors", "Interchange", new Color(0.01f, 0.34f, 1), ".");
-            ReserveColorConfig = config.Bind("Loading Screen Accent Colors", "Reserve", new Color(0.49f, 0.06f, 0.01f), ".");
-            ShorelineColorConfig = config.Bind("Loading Screen Accent Colors", "Shoreline", new Color(0.43f, 0.19f, 0.43f), ".");
-            LighthouseColorConfig = config.Bind("Loading Screen Accent Colors", "Lighthouse", new Color(0.90f, 0.6f, 0.13f), ".");
-            GroundZeroColorConfig = config.Bind("Loading Screen Accent Colors", "Ground Zero", new Color(0.53f, 0.6f, 0.67f), ".");
-            StreetsColorConfig = config.Bind("Loading Screen Accent Colors", "Streets", new Color(0.55f, .5f, 0.5f), ".");
-            LabsColorConfig = config.Bind("Loading Screen Accent Colors", "Labs", new Color(1, 1, 1), ".");
+            ColorUtility.TryParseHtmlString("#CEB014FF", out Color customsColor);
+            ColorUtility.TryParseHtmlString("#923700FF", out Color factoryColor);
+            ColorUtility.TryParseHtmlString("#3A6724FF", out Color woodsColor);
+            ColorUtility.TryParseHtmlString("#0F2AA4FF", out Color interchangeColor);
+            ColorUtility.TryParseHtmlString("#8C0000FF", out Color reserveColor);
+            ColorUtility.TryParseHtmlString("#B75B8CFF", out Color shorelineColor);
+            ColorUtility.TryParseHtmlString("#E68721FF", out Color lighthouseColor);
+            ColorUtility.TryParseHtmlString("#69B1DBFF", out Color groundZeroColor);
+            ColorUtility.TryParseHtmlString("#6D9280FF", out Color streetsColor);
+            ColorUtility.TryParseHtmlString("#FFFFFFFF", out Color labsColor);
+
+            CustomsColorConfig = config.Bind("Loading Screen Accent Colors", "Customs", customsColor, ".");
+            FactoryColorConfig = config.Bind("Loading Screen Accent Colors", "Factory", factoryColor, ".");
+            WoodsColorConfig = config.Bind("Loading Screen Accent Colors", "Woods", woodsColor, ".");
+            InterchangeColorConfig = config.Bind("Loading Screen Accent Colors", "Interchange", interchangeColor, ".");
+            ReserveColorConfig = config.Bind("Loading Screen Accent Colors", "Reserve", reserveColor, ".");
+            ShorelineColorConfig = config.Bind("Loading Screen Accent Colors", "Shoreline", shorelineColor, ".");
+            LighthouseColorConfig = config.Bind("Loading Screen Accent Colors", "Lighthouse", lighthouseColor, ".");
+            GroundZeroColorConfig = config.Bind("Loading Screen Accent Colors", "Ground Zero", groundZeroColor, ".");
+            StreetsColorConfig = config.Bind("Loading Screen Accent Colors", "Streets", streetsColor, ".");
+            LabsColorConfig = config.Bind("Loading Screen Accent Colors", "Labs", labsColor, ".");
 
 
             ClockUsesSystemTimeConfig = config.Bind("General", "Clock Uses System Time", false, "Have the clock widget use your system time.");
@@ -126,28 +138,23 @@ namespace UIRefresh.Config
             {
                 HideGroupPanel_Patch.UpdateGroupPanel();
             };
-            HideGesturesQuickPanel = config.Bind("HUD", "Hide Phrase Prompt", false, "Hides the contextual phrase prompt in raid.");
-            new HideGroupPanel_Patch().Enable();
-            HideGesturesQuickPanel.SettingChanged += delegate (object sender, EventArgs e)
+
+            GesturesQuickPanelAlpha = config.Bind("HUD", "Phrase Prompt Opacity", 0.08f, new ConfigDescription("Fades the contextual phrase prompt in raid", new AcceptableValueRange<float>(0.0f, 1.0f)));
+            GesturesQuickPanelAlpha.SettingChanged += delegate (object sender, EventArgs e)
             {
-                GesturesQuickPanel_ShowPatch.HideGesturesQuickPanelUpdate();
+                GesturesQuickPanel_ShowPatch.UpdateGesturesQuickPanel();
             };
-            HideRaidTimerWarning = config.Bind("HUD", "Hide Raid Timer Warning", true, "Does not work. Hides the <10 minute raid timer");
-            new HideGroupPanel_Patch().Enable();
+
+            HideRaidTimerWarning = config.Bind("z. Beta", "Hide Raid Timer Warning", true, "Does not work. Hides the <10 minute raid timer");
             HideRaidTimerWarning.SettingChanged += delegate (object sender, EventArgs e)
             {
-                HideGroupPanel_Patch.UpdateGroupPanel();
-
             };
-            HideBackpackInventory = config.Bind("HUD", "Backpack Inaccessible on Shoulders", true, "Makes the backpack inaccessable when on your back.");
-            new HideGroupPanel_Patch().Enable();
+            HideBackpackInventory = config.Bind("HUD", "Backpack inaccessible on shoulders", true, "Makes the backpack inaccessable when on your back.");
             HideBackpackInventory.SettingChanged += delegate (object sender, EventArgs e)
             {
-                HideGroupPanel_Patch.UpdateGroupPanel();
             };
-            HideAmmoPanel = config.Bind("HUD", "Hide Ammo Panel", false, "Hides the range of your sight in the bottom right.");
-            new HideGroupPanel_Patch().Enable();
-            HideAmmoPanel.SettingChanged += delegate (object sender, EventArgs e)
+            AmmoPanelAlpha = config.Bind("HUD", "Hide Ammo Panel", 0.1f, new ConfigDescription("Hides the range of your sight in the bottom right.", new AcceptableValueRange<float>(0.0f, 1.0f)));
+            AmmoPanelAlpha.SettingChanged += delegate (object sender, EventArgs e)
             {
                 AmmoPannel_ShowPatch.AmmoPanelUpdate();
             };
