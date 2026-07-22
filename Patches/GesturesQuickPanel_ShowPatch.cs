@@ -5,12 +5,15 @@ using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
 using UnityEngine;
+using UIRefresh.Config;
 
 namespace UIRefresh.Patches
 {
     internal class GesturesQuickPanel_ShowPatch : ModulePatch
     {
         public static GameObject? GesturesQuickPanelObject = null;
+        public static CanvasGroup? GesturesQuickPanelCanvasGroup = null;
+        private static bool setup = false;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -18,24 +21,28 @@ namespace UIRefresh.Patches
         }
 
         [PatchPostfix]
-        static void Postfix(GesturesQuickPanel __instance)
+        static void Postfix(GesturesQuickPanel __instance, CanvasGroup ____canvasGroup)
         {
-
             GesturesQuickPanelObject = __instance.gameObject;
+            GesturesQuickPanelCanvasGroup = ____canvasGroup;
 
-            if (GesturesQuickPanelObject != null)
-            {
-                HideGesturesQuickPanelUpdate();
-
-            }
+            UpdateGesturesQuickPanel();
         }
 
-        public static void HideGesturesQuickPanelUpdate()
+        public static void UpdateGesturesQuickPanel()
         {
-            if (GesturesQuickPanelObject != null)
+            if (GesturesQuickPanelCanvasGroup != null)
             {
-                GesturesQuickPanelObject.SetActive(!Plugin.Instance.UIRefreshConfig.HideGesturesQuickPanel.Value);
+                GesturesQuickPanelCanvasGroup.alpha = Plugin.Instance.UIRefreshConfig.GesturesQuickPanelAlpha.Value;
             }
         }
+
+        public static void GesturesQuickPanelDeactivations()
+        {
+            setup = true;
+            GesturesQuickPanelObject.transform.Find("Hotkey").gameObject.SetActive(false);
+            GesturesQuickPanelObject.transform.Find("Icon").gameObject.SetActive(false);
+        }
+
     }
 }
