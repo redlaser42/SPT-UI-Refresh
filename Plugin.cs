@@ -4,7 +4,7 @@ using UIRefresh.Patches;
 
 namespace UIRefresh
 {
-    [BepInPlugin("com.redlaser42.UI_Refresh", "UI_Refresh", "2.2.0")]
+    [BepInPlugin("com.redlaser42.UIRefresh", "UI_Refresh", "2.2.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; } = null!;
@@ -27,6 +27,9 @@ namespace UIRefresh
             //Clock Patch
             new InventoryScreen_ShowPatch().Enable();
 
+            //Filter Inventory Shortcut
+            //new FilterPanel_Show().Enable();
+
             //Load hideout if needed.
             new MenuScreen_ShowPatch().Enable();
 
@@ -48,7 +51,10 @@ namespace UIRefresh
             //HUD edits
             new CharacterHealthPanel_Patch().Enable();
             new BattleStancePanel_ShowPatch().Enable();
+
             new GesturesQuickPanel_ShowPatch().Enable();
+            //new MainTimerPanel_ShowPatch().Enable();
+
             new AmmoPannel_ShowPatch().Enable();
             new ItemsPanelShow_Patch().Enable();
 
@@ -59,6 +65,11 @@ namespace UIRefresh
             //new HideoutScreenOverlay_Show().Enable();
 
             Utils.checkFika();
+
+            if (Utils.playingFika)
+            {
+                //new FikaCreateMainMenuUI_Patch();
+            }
         }
     }   
 }
