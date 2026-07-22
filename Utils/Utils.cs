@@ -15,6 +15,9 @@ using UnityEngine.SceneManagement;
 public class Utils
 {
     public static bool playingFika;
+    public static bool inRaid;
+
+
     public static void checkFika() {
         if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
         {
