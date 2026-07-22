@@ -19,8 +19,11 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(SessionEndUI __instance)
         {
+            Utils.inRaid = false;
+
+
             EnvironmentUI environmentUI = MonoBehaviourSingleton<EnvironmentUI>.Instance;
-            environmentUI.gameObject.SetActive(true);
+            //nvironmentUI.gameObject.SetActive(true);
         }
     }
 }

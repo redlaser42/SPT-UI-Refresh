@@ -19,6 +19,13 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(MenuScreen __instance, EnvironmentUI ___environmentUI_0)
         {
+
+            if (Utils.inRaid)
+            {
+                ___environmentUI_0.ShowCameraContainer(false);
+            }
+
+
             // Show Hideout in Main Menu
             if (Plugin.Instance.UIRefreshConfig.HideOutMainMenuConfig.Value)
             {

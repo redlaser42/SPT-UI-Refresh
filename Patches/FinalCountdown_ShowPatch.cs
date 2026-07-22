@@ -19,6 +19,7 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(MatchmakerFinalCountdown __instance)
         {
+            Utils.inRaid = true;
             if (Plugin.Instance.UIRefreshConfig.MenuLayoutChangesConfig.Value)
             {
                 __instance.transform.Find("Logo").gameObject.SetActive(false);
@@ -26,7 +27,9 @@ namespace UIRefresh.Patches
             if (Plugin.Instance.UIRefreshConfig.HideMenuBackgroundInRaid.Value)
             {
                 EnvironmentUI environmentUI = MonoBehaviourSingleton<EnvironmentUI>.Instance;
-                environmentUI.gameObject.SetActive(false);
+                environmentUI.ShowEnvironment(false);
+
+                environmentUI.ShowCameraContainer(false);
             }
         }
     }
