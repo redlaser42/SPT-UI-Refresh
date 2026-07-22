@@ -1,17 +1,14 @@
-using EFT;
 using EFT.UI;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
-using UIRefresh.Config;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace UIRefresh.Patches
 {
     internal class HideGroupPanel_Patch : ModulePatch
     {
-        public static GameObject groupPannel;
+        public static GameObject? groupPanel;
         
         protected override MethodBase GetTargetMethod()
         {
@@ -21,12 +18,15 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(MenuScreen __instance)
         {
-            groupPannel = __instance.gameObject;
+            groupPanel = __instance.gameObject;
             UpdateGroupPanel();
         }
         public static void UpdateGroupPanel()
         {
-            groupPannel.SetActive(!Plugin.Instance.UIRefreshConfig.DisableGroupConfig.Value);
+            if (groupPanel != null)
+            {
+                groupPanel.SetActive(!Plugin.Instance.UIRefreshConfig.DisableGroupConfig.Value);
+            }
         }
     }
 }
