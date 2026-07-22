@@ -1,17 +1,18 @@
-﻿
+﻿using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.DragAndDrop;
 using SPT.Reflection.Patching;
-using System;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.UI;
 using static EFT.UI.SimpleStashPanel;
-using EFT.InventoryLogic;
+using static UnityEngine.UI.Image;
 
 namespace UIRefresh.Patches
 {
     internal class ItemsPanelShow_Patch : ModulePatch
     {
+
         protected override MethodBase GetTargetMethod()
         {
             return typeof(ItemsPanel).GetMethod(nameof(ItemsPanel.Show));
@@ -36,24 +37,43 @@ namespace UIRefresh.Patches
 
         private static void HideBackpackInteraction(GameObject backpackSlot)
         {
-            var backpackSlotItemView = backpackSlot.transform.GetChild(1).GetChild(4).gameObject.GetComponent<SlotItemView>();
+            var backpackSlotItemView = backpackSlot.GetComponentInChildren<SlotItemView>(true);
 
             if (backpackSlotItemView != null)
             {
                 var canvasGroup = backpackSlotItemView.GetComponent<CanvasGroup>();
+                var headerImage = backpackSlot.GetComponentInChildren<SlotViewHeader>(true).transform.GetChild(0).GetChild(1).GetComponent<Image>();
 
-                if (canvasGroup != null)
+                if (canvasGroup != null && headerImage != null)
                 {
                     canvasGroup.blocksRaycasts = false;
+                    headerImage.raycastTarget = false;
                 }
             }
         }
 
         private static void HideBackpackGrids(GameObject backpackSlot)
         {
-            if (backpackSlot.transform.GetChild(5).GetChild(0).gameObject != null)
+            var backpackGridView = backpackSlot.GetComponentInChildren<GridView>(true);
+
+            if (backpackGridView != null)
             {
-                backpackSlot.transform.GetChild(5).GetChild(0).gameObject.SetActive(false);
+                backpackGridView.gameObject.SetActive(false);
+            }
+        }
+
+        private static void HideBackground(GameObject backpackSlot)
+        {
+            var backpackSlotItemView = backpackSlot.GetComponentInChildren<SlotItemView>(true);
+
+            if (backpackSlotItemView != null)
+            {
+                var backgroundImage = backpackSlotItemView.gameObject.transform.Find("Background").gameObject;
+
+                if (backgroundImage != null)
+                {
+                    backgroundImage.SetActive(false);
+                }
             }
         }
 
@@ -69,8 +89,10 @@ namespace UIRefresh.Patches
                     if (child.name == "Backpack Slot")
                     {
                         _found = true;
-                        HideBackpackInteraction(child.gameObject);
+
                         HideBackpackGrids(child.gameObject);
+                        HideBackpackInteraction(child.gameObject);
+                        HideBackground(child.gameObject);
 
                         Destroy(this);
                     }
