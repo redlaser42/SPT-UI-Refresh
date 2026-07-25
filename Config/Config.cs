@@ -13,6 +13,11 @@ namespace UIRefresh.Config
         public ConfigEntry<bool> HideStanceSillhouette { get; set; }
         public ConfigEntry<float> GesturesQuickPanelAlpha { get; set; }
         public ConfigEntry<bool> HideRaidTimerWarning { get; set; }
+        public ConfigEntry<bool> DisableStanceSlider { get; set; }
+        public ConfigEntry<bool> DisableNoiseLevel { get; set; }
+        public ConfigEntry<bool> DisableSpeedSlider { get; set; }
+
+
         public ConfigEntry<float> AmmoPanelAlpha { get; set; }
 
         public ConfigEntry<bool> HideBackpackInventory { get; set; }
@@ -155,6 +160,21 @@ namespace UIRefresh.Config
             };
             AmmoPanelAlpha = config.Bind("HUD", "Hide Ammo Panel", 0.1f, new ConfigDescription("Hides the range of your sight in the bottom right.", new AcceptableValueRange<float>(0.0f, 1.0f)));
             AmmoPanelAlpha.SettingChanged += delegate (object sender, EventArgs e)
+            {
+                AmmoPannel_ShowPatch.AmmoPanelUpdate();
+            };
+            DisableNoiseLevel = config.Bind("HUD", "Disable Noise Level", true, "Hides the Noise Level indicator on the BattleHUD");
+            DisableNoiseLevel.SettingChanged += delegate (object sender, EventArgs e)
+            {
+                AmmoPannel_ShowPatch.AmmoPanelUpdate();
+            };
+            DisableSpeedSlider = config.Bind("HUD", "Disable Speed Slider", true, "Hides the Speed Slider on the BattleHUD");
+            DisableSpeedSlider.SettingChanged += delegate (object sender, EventArgs e)
+            {
+                AmmoPannel_ShowPatch.AmmoPanelUpdate();
+            };
+            DisableStanceSlider = config.Bind("HUD", "Disable Stance Slider", true, "Hides the Stance Slider on the BattleHUD");
+            DisableStanceSlider.SettingChanged += delegate (object sender, EventArgs e)
             {
                 AmmoPannel_ShowPatch.AmmoPanelUpdate();
             };
