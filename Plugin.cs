@@ -4,7 +4,7 @@ using UIRefresh.Patches;
 
 namespace UIRefresh
 {
-    [BepInPlugin("com.redlaser42.UIRefresh", "UI_Refresh", "2.2.0")]
+    [BepInPlugin("redlaser42.UIRefresh", "UI_Refresh", "2.2.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; } = null!;
@@ -56,8 +56,6 @@ namespace UIRefresh
             //new MainTimerPanel_ShowPatch().Enable();
 
             new AmmoPannel_ShowPatch().Enable();
-            new ItemsPanelShow_Patch().Enable();
-
 
             //Exiting Raid
             new SessionResultExitStatus_ShowPatch().Enable();
