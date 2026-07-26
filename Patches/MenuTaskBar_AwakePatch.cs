@@ -89,8 +89,7 @@ namespace UIRefresh.Patches
                                         };
                                     }
 
-                                    var sideSelectionMenuGO = GameObject.Find("Menu UI/UI/MatchMaker Side Selection Screen/");
-                                    var sideSelectionInst = sideSelectionMenuGO.transform.GetComponent<MatchMakerSideSelectionScreen>();
+                                    var sideSelectionInst = GameObject.Find("Menu UI/UI/MatchMaker Side Selection Screen/").GetComponent<MatchMakerSideSelectionScreen>();
 
                                     AccessTools.Field(typeof(MatchMakerSideSelectionScreen), "esideType_0").SetValue(sideSelectionInst, ESideType.Pmc);
 

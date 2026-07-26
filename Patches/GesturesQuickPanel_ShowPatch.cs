@@ -13,7 +13,6 @@ namespace UIRefresh.Patches
     {
         public static GameObject? GesturesQuickPanelObject = null;
         public static CanvasGroup? GesturesQuickPanelCanvasGroup = null;
-        private static bool setup = false;
 
         protected override MethodBase GetTargetMethod()
         {
@@ -36,13 +35,5 @@ namespace UIRefresh.Patches
                 GesturesQuickPanelCanvasGroup.alpha = Plugin.Instance.UIRefreshConfig.GesturesQuickPanelAlpha.Value;
             }
         }
-
-        public static void GesturesQuickPanelDeactivations()
-        {
-            setup = true;
-            GesturesQuickPanelObject.transform.Find("Hotkey").gameObject.SetActive(false);
-            GesturesQuickPanelObject.transform.Find("Icon").gameObject.SetActive(false);
-        }
-
     }
 }
