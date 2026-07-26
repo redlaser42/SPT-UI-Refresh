@@ -20,10 +20,6 @@ namespace UIRefresh.Config
 
         public ConfigEntry<float> AmmoPanelAlpha { get; set; }
 
-        public ConfigEntry<bool> HideBackpackInventory { get; set; }
-
-
-
         public ConfigEntry<bool> MoveHealthPanelConfig { get; set; }
         public ConfigEntry<bool> HideOutMainMenuConfig { get; set; }
         public ConfigEntry<bool> SkipPreRaidMenusConfig { get; set; }
@@ -86,7 +82,7 @@ namespace UIRefresh.Config
 
             ClockUsesSystemTimeConfig = config.Bind("General", "Clock Uses System Time", false, "Have the clock widget use your system time.");
             MenuLayoutChangesConfig = config.Bind("General", "Menu Layout Changes", true, "Enables the various edits to the layouts of menus.");
-            SkipPreRaidMenusConfig = config.Bind("z. Beta", "Skip Pre-Raid Menus", false, "Skips Raid Settings and Insurance Menus.");
+            SkipPreRaidMenusConfig = config.Bind("General", "Skip Pre-Raid Menus", false, "Skips Raid Settings and Insurance Menus.");
             EnableClockPatchConfig = config.Bind("General", "Enable Clock Widget", true, "Enable or disable the raid clock widget.");
 
 
@@ -152,10 +148,6 @@ namespace UIRefresh.Config
 
             HideRaidTimerWarning = config.Bind("z. Beta", "Hide Raid Timer Warning", true, "Does not work. Hides the <10 minute raid timer");
             HideRaidTimerWarning.SettingChanged += delegate (object sender, EventArgs e)
-            {
-            };
-            HideBackpackInventory = config.Bind("HUD", "Backpack inaccessible on shoulders", true, "Makes the backpack inaccessable when on your back.");
-            HideBackpackInventory.SettingChanged += delegate (object sender, EventArgs e)
             {
             };
             AmmoPanelAlpha = config.Bind("HUD", "Hide Ammo Panel", 0.1f, new ConfigDescription("Hides the range of your sight in the bottom right.", new AcceptableValueRange<float>(0.0f, 1.0f)));
