@@ -18,6 +18,11 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(MatchmakerOfflineRaidScreen __instance)
         {
+            if (Plugin.Instance.UIRefreshConfig.SkipPreRaidMenusConfig.Value)
+            {
+                __instance.method_5();
+                return;
+            }
             if (Plugin.Instance.UIRefreshConfig.MenuLayoutChangesConfig.Value)
             {
                 // Deactivates top text and spacers.
@@ -32,11 +37,7 @@ namespace UIRefresh.Patches
                 __instance.transform.Find("Content").Find("Space (2)").gameObject.SetActive(true);
             }
 
-            if (Plugin.Instance.UIRefreshConfig.SkipPreRaidMenusConfig.Value)
-            {
-                var nextButton = __instance.transform.Find("ScreenDefaultButtons/NextButton/");
-                nextButton.GetComponent<DefaultUIButton>().method_11();
-            }
+
         }
     }
 }
