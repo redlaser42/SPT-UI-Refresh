@@ -30,7 +30,6 @@ namespace UIRefresh.Patches
             {
                 preloaderUI.SetMenuTaskBarVisibility(false);
 
-
                 //Deactivate banner, logo, tips, and loading spinner.
                 var bannerPanel = ____bannersPanel.gameObject;
                 if (bannerPanel != null)
@@ -70,7 +69,12 @@ namespace UIRefresh.Patches
                 //Map Name - move, increase font, set background to match.
                 if (locationNamePanel != null)
                 {
-                    locationNamePanel.Find("Name").GetComponent<RectTransform>().anchoredPosition = new Vector2(-990, 100);
+                    //locationNamePanel.Find("Name").GetComponent<RectTransform>().anchoredPosition = new Vector2(-930, 100);
+                    locationNamePanel.GetComponent<RectTransform>().anchorMin = new Vector2(0, 1);
+                    locationNamePanel.GetComponent<RectTransform>().anchorMax = new Vector2(0, 1);
+                    locationNamePanel.GetComponent<RectTransform>().pivot = new Vector2(0, 1);
+                    locationNamePanel.GetComponent<RectTransform>().anchoredPosition = new Vector2(50, -40);
+
 
 
                     //locationNameGUI.alignment = TextAlignmentOptions.Center;
@@ -98,7 +102,7 @@ namespace UIRefresh.Patches
                 var deployCaption = __instance.transform.Find("Deploying Caption");
                 if (deployCaption != null)
                 {
-                    deployCaption.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(-620, 20);
+                    deployCaption.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(-610, 23);
                     //deployCaption.gameObject.GetComponent<CustomTextMeshProUGUI>().alignment = TextAlignmentOptions.Left;
                 }
 
