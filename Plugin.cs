@@ -4,7 +4,7 @@ using UIRefresh.Patches;
 
 namespace UIRefresh
 {
-    [BepInPlugin("redlaser42.UIRefresh", "UI_Refresh", "2.2.0")]
+    [BepInPlugin("redlaser42.UIRefresh", "UI Refresh", "2.3.0")]
     public class Plugin : BaseUnityPlugin
     {
         public static Plugin Instance { get; private set; } = null!;
@@ -43,6 +43,7 @@ namespace UIRefresh
             new InsuranceScreen_ShowPatch().Enable();
             //Host or Join Menu
             new MatchMakerAcceptScreen_Patch().Enable();
+            new MatchMakerAcceptScreenMethod_27_Patch().Enable();
             //Loading Screen
             new TimeHasCome_ShowPatch().Enable();
             //Deploying... screen
