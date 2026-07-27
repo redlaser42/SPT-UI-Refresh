@@ -11,7 +11,7 @@ namespace UIRefresh.Patches
     {
         public static GameObject? AmmoCountPanelObject = null;
         public static Image? AmmoIcon = null;
-        public static TextMeshProUGUI[]? AmmoPanelTextMeshProUGUI = null;
+        public static CustomTextMeshProUGUI[]? AmmoPanelTextMeshProUGUI = null;
 
 
         protected override MethodBase GetTargetMethod()
@@ -22,10 +22,20 @@ namespace UIRefresh.Patches
         [PatchPostfix]
         static void Postfix(AmmoCountPanel __instance)
         {
-            AmmoPanelTextMeshProUGUI = __instance.gameObject.GetComponentsInChildren<TextMeshProUGUI>();
+            AmmoPanelTextMeshProUGUI = __instance.gameObject.GetComponentsInChildren<CustomTextMeshProUGUI>();
+
             var AmmoPanelBG = __instance.gameObject.GetComponent<Image>();
-            AmmoIcon = __instance.transform.Find("/Ammo/Details/AmmoImage/").GetComponent<Image>();
-            AmmoPanelBG.ChangeImageAlpha(0);
+
+            if (AmmoPanelBG != null)
+            {
+                AmmoPanelBG.ChangeImageAlpha(0);
+            }
+
+            var AmmoIconGameObject = __instance.transform.Find("Ammo/Details/AmmoImage/");
+            if (AmmoIconGameObject != null)
+            {
+                AmmoIcon = AmmoIconGameObject.GetComponent<Image>();
+            }
 
             AmmoPanelUpdate();
         }
